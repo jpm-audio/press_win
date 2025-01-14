@@ -5,6 +5,7 @@ import PixiPlugin from 'gsap/PixiPlugin';
 import Environment from './systems/environment/environment';
 import { ENVIRONMENT_CONFIG } from './systems/environment/settings';
 import Game from './systems/game/game';
+import { Locale } from './systems/locale/locale';
 
 (async () => {
   const environment = new Environment(ENVIRONMENT_CONFIG);
@@ -28,6 +29,9 @@ import Game from './systems/game/game';
   // Init GSAP
   gsap.registerPlugin(PixiPlugin);
   PixiPlugin.registerPIXI({ Container, Sprite });
+
+  // Init Locale
+  await Locale.init();
 
   // Init Game
   await Game.init(app, environment);
