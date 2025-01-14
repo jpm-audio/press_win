@@ -1,0 +1,32 @@
+{
+  "name": "press-win",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Chance based 2D mini game where the player is presented with 3 mystery gifts",
+  "author": "Jesús Pérez de Miguel <jesus@perezdemiguel.com>",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext .ts",
+    "lint-fix": "eslint . --ext .ts --fix"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.12.0",
+    "@types/fscreen": "^1.0.4",
+    "eslint": "^9.12.0",
+    "globals": "^15.11.0",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.8.1",
+    "vite": "^5.4.11"
+  },
+  "dependencies": {
+    "@pixi/sound": "^6.0.1",
+    "@pixi/ui": "^2.2.0",
+    "gsap": "^3.12.5",
+    "i18next": "^24.0.5",
+    "i18next-browser-languagedetector": "^8.0.1",
+    "pixi.js": "^8.6.1",
+    "ua-parser-js": "^2.0.0"
+  }
+}
