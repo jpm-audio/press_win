@@ -32,5 +32,14 @@ import Game from './systems/game/game';
   // Init Game
   await Game.init(app, environment);
 
-  window.Game = Game;
+  // Remove Splash Screen
+  const elSplashScreen = document.getElementById('splash_screen');
+  await gsap.to(elSplashScreen, {
+    duration: 0.5,
+    opacity: 0,
+    ease: 'power1.inOut',
+  });
+  elSplashScreen?.parentNode?.removeChild(elSplashScreen);
+
+  //window.Game = Game;
 })();
