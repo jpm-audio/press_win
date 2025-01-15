@@ -71,7 +71,8 @@ export default class LoadingScene extends Scene {
     bgBar.y = this._loadingBar.y = 470;
   }
 
-  public async loadingTo(value: number, duration: number = 2) {
+  public async progressTo(value: number, duration: number = 2) {
+    console.log('progress: ', value);
     if (this._currentLoadingAnimation) {
       this._currentLoadingAnimation.kill();
     }
@@ -82,14 +83,14 @@ export default class LoadingScene extends Scene {
       pixi: {
         percentage: value,
       },
-      onUpdate: () => this.setLoading(this.percentage),
+      onUpdate: () => this.setProgress(this.percentage),
     });
 
     await this._currentLoadingAnimation;
     this._currentLoadingAnimation = null;
   }
 
-  public setLoading(value: number) {
+  public setProgress(value: number) {
     const width = this.barWidth * value;
     const gradientFill = new FillGradient(0, 0, width, this.barHeight);
     gradientFill.addColorStop(0, 0x00ffff);
@@ -99,5 +100,11 @@ export default class LoadingScene extends Scene {
     this._loadingBar.rect(0, 0, width, this.barHeight);
 
     this._loadingBar.fill(gradientFill);
+
+    this.percentage = value;
+  }
+
+  public async waitForStartAction() {
+    return;
   }
 }

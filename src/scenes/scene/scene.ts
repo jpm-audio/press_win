@@ -1,3 +1,4 @@
+import gsap from 'gsap';
 import { Container } from 'pixi.js';
 
 export default class Scene extends Container {

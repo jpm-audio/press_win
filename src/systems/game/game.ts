@@ -1,9 +1,12 @@
-import { Application, Assets, Container, EventEmitter } from 'pixi.js';
+import { Application, Container, EventEmitter } from 'pixi.js';
 import Environment from '../environment/environment';
 import LoadingScene from '../../scenes/loading/loadingScene';
 import { eEnvironmentEvents } from '../environment/types';
 import Scene from '../../scenes/scene/scene';
 import { GAME_CONFIG } from './config';
+import LoadManager from '../loader/loadManager';
+import GameScene from '../../scenes/game/gameScene';
+import { eGameEvents } from './types';
 
 export default class Game {
   private static _instance: Game;
@@ -14,6 +17,7 @@ export default class Game {
   private _assetsResolution!: number;
   private _assetsResolutionIndex!: number;
   private _layerGame!: Container;
+  private _loader!: LoadManager;
 
   public static get game() {
     return Game._instance;
@@ -65,25 +69,40 @@ export default class Game {
     Game.stage.addChild(this._layerGame);
 
     // Resize Handling
-    this.watchResize();
+    this._watchResize();
 
-    // Preloading
-    await this.preload();
+    // Create LoadManager
+    const fileSufix =
+      GAME_CONFIG.fileResolutionSufixes[this._assetsResolutionIndex];
+    this._loader = new LoadManager().init(
+      GAME_CONFIG.getAssetsInitOptions(fileSufix)
+    );
 
+    // Preloading...
+    await this._loader.loadByBundleIndex(0);
+
+    // <-> Change Preloading Scene to Loading Scene
     const loadingScene = new LoadingScene();
     loadingScene.init();
     await this._setScene(loadingScene);
+    Game.bus.emit(eGameEvents.LOADING);
 
-    // Loading
+    // Loading...
+    await this._loader.loadByBundleIndex(1, (progress) =>
+      loadingScene.progressTo(progress)
+    );
+    Game.bus.emit(eGameEvents.LOADED);
 
-    // Build Game
+    // <-> Change Loading Scene to Game Scene
+    const gameScene = new GameScene();
+    await loadingScene.waitForStartAction();
+    await this._setScene(gameScene);
 
     // Start Game
-
-    return;
+    Game.bus.emit(eGameEvents.READY);
   }
 
-  public watchResize() {
+  protected _watchResize() {
     Game.environment.on(
       eEnvironmentEvents.SCREEN_SIZE_CHANGE,
       this.onScreenResize,
@@ -95,15 +114,6 @@ export default class Game {
       this
     );
     this.onScreenResize();
-  }
-
-  public async preload() {
-    const fileSufix =
-      GAME_CONFIG.fileResolutionSufixes[this._assetsResolutionIndex];
-    const assetsInitOptions = GAME_CONFIG.getAssetsInitOptions(fileSufix);
-    Assets.init(assetsInitOptions);
-
-    await Assets.loadBundle(assetsInitOptions?.manifest?.bundles[0].name);
   }
 
   protected async _setScene(scene: Scene) {
@@ -139,9 +149,26 @@ export default class Game {
         };
 
     this._layerGame.scale.set(scale);
+    this._layerGame.x =
+      ((drawSize.width - GAME_CONFIG.referenceSize.width) / 2) * scale;
+    this._layerGame.y =
+      ((drawSize.height - GAME_CONFIG.referenceSize.height) / 2) * scale;
 
     if (this._currentScene) {
       this._currentScene.onScreenResize(drawSize);
     }
+  }
+
+  public destroy() {
+    Game.environment.off(
+      eEnvironmentEvents.SCREEN_SIZE_CHANGE,
+      this.onScreenResize,
+      this
+    );
+    Game.environment.off(
+      eEnvironmentEvents.ORIENTATION_CHANGE,
+      this.onScreenResize,
+      this
+    );
   }
 }

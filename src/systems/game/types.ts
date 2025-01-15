@@ -11,3 +11,9 @@ export interface iGameConfig {
   audioBasePath: string;
   getAssetsInitOptions: (resolutionSufix: string) => AssetInitOptions;
 }
+
+export enum eGameEvents {
+  LOADING = 'gameEventLoading',
+  LOADED = 'gameEventLoaded',
+  READY = 'gameEventReady',
+}
