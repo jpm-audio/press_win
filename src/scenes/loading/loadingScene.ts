@@ -1,13 +1,16 @@
-import { Color, FillGradient, Graphics, Sprite } from 'pixi.js';
+import { Color, Container, FillGradient, Graphics, Sprite } from 'pixi.js';
 import createRadialGradientTexture from '../../utils/createRadialGradientTexture';
 import { GAME_CONFIG } from '../../systems/game/config';
 import Game from '../../systems/game/game';
 import Scene from '../scene/scene';
 import gsap from 'gsap';
 import { LocaleText } from '../../components/text/localeText';
+import ButtonFactory from '../../components/buttons/buttonFactory';
+import DefaultButtonBuilder from '../../components/buttons/defaultButton/defaultButtonBulder';
 
 export default class LoadingScene extends Scene {
   protected _background!: Sprite;
+  protected _loadingContainer!: Container;
   protected _loadingBar!: Graphics;
   protected _currentLoadingAnimation: gsap.core.Tween | null = null;
   public percentage = 0;
@@ -41,6 +44,9 @@ export default class LoadingScene extends Scene {
     logo.y = (3 * GAME_CONFIG.referenceSize.height) / 8;
     this.addChild(logo);
 
+    this._loadingContainer = new Container();
+    this.addChild(this._loadingContainer);
+
     // Loading Text
     const loadingText = new LocaleText({
       text: 'loading',
@@ -53,26 +59,25 @@ export default class LoadingScene extends Scene {
     loadingText.anchor.set(0.5);
     loadingText.x = GAME_CONFIG.referenceSize.width / 2;
     loadingText.y = 430;
-    this.addChild(loadingText);
+    this._loadingContainer.addChild(loadingText);
 
     // Loading Bar
-    const bgBar = new Graphics();
-    bgBar.rect(0, 0, this.barWidth, this.barHeight);
-    bgBar.fill(0x000000);
-    bgBar.stroke({ color: 0xffffff, width: 1, alpha: 0.15 });
+    const loadingBarBg = new Graphics();
+    loadingBarBg.rect(0, 0, this.barWidth, this.barHeight);
+    loadingBarBg.fill(0x000000);
+    loadingBarBg.stroke({ color: 0xffffff, width: 1, alpha: 0.15 });
 
-    this.addChild(bgBar);
+    this._loadingContainer.addChild(loadingBarBg);
 
     this._loadingBar = new Graphics();
-    this.addChild(this._loadingBar);
+    this._loadingContainer.addChild(this._loadingBar);
 
-    bgBar.x = this._loadingBar.x =
+    loadingBarBg.x = this._loadingBar.x =
       (GAME_CONFIG.referenceSize.width - this.barWidth) / 2;
-    bgBar.y = this._loadingBar.y = 470;
+    loadingBarBg.y = this._loadingBar.y = 470;
   }
 
   public async progressTo(value: number, duration: number = 2) {
-    console.log('progress: ', value);
     if (this._currentLoadingAnimation) {
       this._currentLoadingAnimation.kill();
     }
@@ -105,6 +110,33 @@ export default class LoadingScene extends Scene {
   }
 
   public async waitForStartAction() {
+    if (this._currentLoadingAnimation) {
+      await this._currentLoadingAnimation;
+    }
+    // Remove the loading bar
+    this._loadingContainer.visible = false;
+
+    // Add the start button
+    const startButton = ButtonFactory.button({
+      buttonBuilder: new DefaultButtonBuilder(),
+      text: 'startButton',
+      width: 200,
+      height: 50,
+    });
+
+    startButton.x = GAME_CONFIG.referenceSize.width / 2;
+    startButton.y = 450;
+    this.addChild(startButton);
+
+    await new Promise((resolve) => {
+      const onPress = () => {
+        resolve(null);
+        startButton.off('pointerup', onPress, this);
+        this.removeChild(startButton);
+      };
+      startButton.on('pointerup', onPress, this);
+    });
+
     return;
   }
 }

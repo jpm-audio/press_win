@@ -21,7 +21,7 @@ export default class Scene extends Container {
   public async open() {
     await gsap.to(this, {
       duration: this.openTime,
-      alphay: 1,
+      alpha: 1,
       ease: 'power1.in',
     });
   }

@@ -88,18 +88,18 @@ export default class Game {
     Game.bus.emit(eGameEvents.LOADING);
 
     // Loading...
-    await this._loader.loadByBundleIndex(1, (progress) =>
-      loadingScene.progressTo(progress)
-    );
-    Game.bus.emit(eGameEvents.LOADED);
-
-    // <-> Change Loading Scene to Game Scene
-    const gameScene = new GameScene();
-    await loadingScene.waitForStartAction();
-    await this._setScene(gameScene);
-
-    // Start Game
-    Game.bus.emit(eGameEvents.READY);
+    this._loader
+      .loadByBundleIndex(1, (progress) => loadingScene.progressTo(progress))
+      .then(async () => {
+        Game.bus.emit(eGameEvents.LOADED);
+        // <-> Change Loading Scene to Game Scene
+        const gameScene = new GameScene();
+        await loadingScene.waitForStartAction();
+        await this._setScene(gameScene);
+        console.log('GAME SCENE');
+        // Start Game
+        Game.bus.emit(eGameEvents.READY);
+      });
   }
 
   protected _watchResize() {
