@@ -1,7 +1,5 @@
 import { Color, Container, FillGradient, Graphics, Sprite } from 'pixi.js';
-import createRadialGradientTexture from '../../utils/createRadialGradientTexture';
 import { GAME_CONFIG } from '../../systems/game/config';
-import Game from '../../systems/game/game';
 import Scene from '../scene/scene';
 import gsap from 'gsap';
 import { LocaleText } from '../../components/text/localeText';
@@ -18,23 +16,13 @@ export default class LoadingScene extends Scene {
   public barHeight = 5;
 
   public init() {
+    this._id = 'Loading Scene';
+
     // Background
-    const backgroundRadius = Math.min(
-      GAME_CONFIG.referenceSize.width,
-      GAME_CONFIG.referenceSize.height
-    );
-    const bgTexture = createRadialGradientTexture(
-      backgroundRadius * Game.game.assetsResolution,
-      [
-        { color: new Color(0x003b56), stop: 0 },
-        { color: new Color(0x000000), stop: 1 },
-      ]
-    );
-    this._background = Sprite.from(bgTexture);
-    this._background.anchor.set(0.5);
-    this._background.width = this._background.height = backgroundRadius;
-    this._background.x = GAME_CONFIG.referenceSize.width / 2;
-    this._background.y = GAME_CONFIG.referenceSize.height / 2;
+    this._background = this._getBackground([
+      { color: new Color(0x003b56), stop: 0 },
+      { color: new Color(0x000000), stop: 1 },
+    ]);
     this.addChild(this._background);
 
     // Logo
@@ -77,7 +65,7 @@ export default class LoadingScene extends Scene {
     loadingBarBg.y = this._loadingBar.y = 470;
   }
 
-  public async progressTo(value: number, duration: number = 2) {
+  public async progressTo(value: number, duration: number = 1) {
     if (this._currentLoadingAnimation) {
       this._currentLoadingAnimation.kill();
     }

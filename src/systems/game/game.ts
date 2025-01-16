@@ -35,6 +35,10 @@ export default class Game {
     return Game._app.stage;
   }
 
+  public static get renderer() {
+    return Game._app.renderer;
+  }
+
   public static async init(app: Application, environment: Environment) {
     Game._instance = new Game();
     Game._bus = new EventEmitter();
@@ -93,10 +97,9 @@ export default class Game {
       .then(async () => {
         Game.bus.emit(eGameEvents.LOADED);
         // <-> Change Loading Scene to Game Scene
-        const gameScene = new GameScene();
+        const gameScene = new GameScene().init();
         await loadingScene.waitForStartAction();
         await this._setScene(gameScene);
-        console.log('GAME SCENE');
         // Start Game
         Game.bus.emit(eGameEvents.READY);
       });
@@ -120,8 +123,8 @@ export default class Game {
     const prevScene = this._currentScene;
 
     this._currentScene = scene;
-    this._currentScene.alpha = 1;
-    this._layerGame.addChild(this._currentScene);
+    this._layerGame.addChildAt(this._currentScene, 0);
+    this._currentScene.open();
 
     await prevScene?.close();
     this._layerGame.removeChild(prevScene);
