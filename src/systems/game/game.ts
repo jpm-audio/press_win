@@ -39,6 +39,10 @@ export default class Game {
     return Game._app.renderer;
   }
 
+  public static get ticker() {
+    return Game._app.ticker;
+  }
+
   public static async init(app: Application, environment: Environment) {
     Game._instance = new Game();
     Game._bus = new EventEmitter();

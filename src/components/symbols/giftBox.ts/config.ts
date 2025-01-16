@@ -99,3 +99,30 @@ export const GIFT_C2A_SHAKE_ANIMATION_OPTIONS: () => iShakeAnimationOptions =
       signStart: seed > 0.5 ? 'minus' : 'plus',
     };
   };
+
+export const GIFT_HIDE_ANIMATION_OPTIONS = {
+  duration: 0.35,
+  easing: 'back.in(1.4)',
+  target: {
+    from: {
+      position: { x: 0, y: 0 },
+      scale: 1,
+      alpha: 1,
+    },
+    to: {
+      position: { x: 0, y: -50 },
+      scale: 1.5,
+      alpha: 0,
+    },
+  },
+  shadow: {
+    from: {
+      alpha: 1,
+      scale: 1,
+    },
+    to: {
+      alpha: 0,
+      scale: 2,
+    },
+  },
+};
