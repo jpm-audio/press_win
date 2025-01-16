@@ -40,3 +40,62 @@ export const GIFT_BOX_SHAKE_ANIMATION_OPTIONS: () => iShakeAnimationOptions =
       signStart: Math.random() > 0.5 ? 'minus' : 'plus',
     };
   };
+
+export const GIFT_C2A_UP_ANIMATION_OPTIONS = {
+  duration: 0.35,
+  easing: 'power2.inOut',
+  target: {
+    from: {
+      position: { x: 0, y: 0 },
+    },
+    to: {
+      position: { x: 0, y: -100 },
+    },
+  },
+  shadow: {
+    from: {
+      alpha: 1,
+      scale: 1,
+    },
+    to: {
+      alpha: 0.9,
+      scale: 1.5,
+    },
+  },
+};
+
+export const GIFT_C2A_DOWN_ANIMATION_OPTIONS = {
+  duration: 0.15,
+  easing: 'power2.in',
+  target: {
+    from: {
+      position: { x: 0, y: -100 },
+    },
+    to: {
+      position: { x: 0, y: 0 },
+    },
+  },
+  shadow: {
+    from: {
+      alpha: 0.9,
+      scale: 1.5,
+    },
+    to: {
+      alpha: 1,
+      scale: 1,
+    },
+  },
+};
+
+export const GIFT_C2A_SHAKE_ANIMATION_OPTIONS: () => iShakeAnimationOptions =
+  () => {
+    const seed = Math.random();
+    return {
+      duration: 0.35,
+      easing: 'power1.inOut',
+      numMoves: 4,
+      maxRotation: Math.PI / 18,
+      rotationDecrement: 0.75,
+      signStart: seed > 0.5 ? 'minus' : 'plus',
+    };
+  };

@@ -30,7 +30,12 @@ export default class ShakeAnimation extends TweenAnimation {
       });
 
       sign *= -1;
-      rotation *= this.options.rotationDecrement;
+
+      if (i === this.options.numMoves - 2) {
+        rotation = 0;
+      } else {
+        rotation *= this.options.rotationDecrement;
+      }
     }
   }
 }

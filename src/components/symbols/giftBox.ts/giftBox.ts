@@ -3,6 +3,9 @@ import TextureFactory from '../../textures/textureFactory';
 import {
   GIFT_BOX_SHAKE_ANIMATION_OPTIONS,
   GIFT_BOX_SHOW_ANIMATION_OPTIONS,
+  GIFT_C2A_DOWN_ANIMATION_OPTIONS,
+  GIFT_C2A_SHAKE_ANIMATION_OPTIONS,
+  GIFT_C2A_UP_ANIMATION_OPTIONS,
 } from './config';
 import FallDownAnimation from '../../../animations/fallDownAnimation/fallDownAnimation';
 import ShakeAnimation from '../../../animations/shakeAnimation/shakeAnimation';
@@ -10,7 +13,7 @@ import ShakeAnimation from '../../../animations/shakeAnimation/shakeAnimation';
 export default class GiftBox extends Container {
   protected _shadow: Sprite;
   protected _giftBox: Sprite;
-  protected _showAnimation!: FallDownAnimation;
+  protected _moveAnimation!: FallDownAnimation;
   protected _shakeAnimation!: ShakeAnimation;
   protected _settings = {
     shadow: {
@@ -32,7 +35,7 @@ export default class GiftBox extends Container {
     this._giftBox.anchor.set(0.5);
     this.addChild(this._giftBox);
 
-    this._showAnimation = new FallDownAnimation(
+    this._moveAnimation = new FallDownAnimation(
       this._giftBox,
       this._shadow,
       GIFT_BOX_SHOW_ANIMATION_OPTIONS
@@ -46,8 +49,19 @@ export default class GiftBox extends Container {
 
   public async show() {
     this._shakeAnimation.options = GIFT_BOX_SHAKE_ANIMATION_OPTIONS();
-
-    await this._showAnimation.start();
+    this._moveAnimation.options = GIFT_BOX_SHOW_ANIMATION_OPTIONS;
+    await this._moveAnimation.start();
     await this._shakeAnimation.start();
+  }
+
+  public async callToAction() {
+    this._moveAnimation.options = GIFT_C2A_UP_ANIMATION_OPTIONS;
+    this._shakeAnimation.options = GIFT_C2A_SHAKE_ANIMATION_OPTIONS();
+
+    this._shakeAnimation.start();
+    await this._moveAnimation.start();
+
+    this._moveAnimation.options = GIFT_C2A_DOWN_ANIMATION_OPTIONS;
+    await this._moveAnimation.start();
   }
 }
