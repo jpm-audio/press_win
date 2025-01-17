@@ -8,13 +8,11 @@ import {
 } from './config';
 import { iFloatingAnimationOptions } from '../../../animations/floatingAnimation/types';
 import FloatingAnimation from '../../../animations/floatingAnimation/floatingAnimation';
-import { BubblesAnimation } from '../../particles/bubbles/bubblesAnimation';
 
 export default class Symbol extends Container {
   protected _floatingLayer: Container;
   protected _bubble: Sprite;
   protected _symbol: Sprite;
-  protected _bubblesParticles: BubblesAnimation;
   protected _shine: Sprite;
   protected _symbolType: string = '';
   protected _currentShowHideTween: gsap.core.Tween | null = null;
@@ -52,9 +50,6 @@ export default class Symbol extends Container {
     this._shine.anchor.set(0.5);
     this._shine.blendMode = 'add';
     this.addChild(this._shine);
-
-    this._bubblesParticles = new BubblesAnimation();
-    this.addChild(this._bubblesParticles);
 
     this.symbolType = symbolType;
   }
@@ -110,9 +105,6 @@ export default class Symbol extends Container {
     // Symbol & Bubble Disappear
     this._floatingLayer.scale.set(0);
     this._shine.alpha = 0;
-
-    // Bubbles Particles Appears instead
-    this._bubblesParticles.start();
 
     await floatinStopPromise;
   }

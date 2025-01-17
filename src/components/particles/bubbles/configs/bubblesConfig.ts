@@ -13,8 +13,8 @@ export const BUBBLES_PARTICLES_CONFIG: iParticleEmitterOptions = {
     position: {
       x: [-100, 100],
       y: [-100, 100],
-      velocityX: [-100, 100] as TParticleOptionRange,
-      velocityY: [-100, 100] as TParticleOptionRange,
+      velocityX: [-200, 200] as TParticleOptionRange,
+      velocityY: [-200, 200] as TParticleOptionRange,
     },
     scale: [0.05, 0.2],
   },

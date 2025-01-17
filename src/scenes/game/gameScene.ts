@@ -4,17 +4,23 @@ import { eGameSceneModes } from './types';
 import gsap from 'gsap';
 import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
 import { GAME_CONFIG } from '../../systems/game/config';
-import { iServerInitResponse } from '../../api/types';
+import { iServerInitResponse, iServerPlayResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
 import { MESSAGE_BOX_CONFIG } from './config';
 import Game from '../../systems/game/game';
 import { eSymbolsFrameEvents } from '../../components/symbols/frame/types';
+import ButtonFactory from '../../components/buttons/buttonFactory';
+import Button from '../../components/buttons/button';
+import DefaultButtonBuilder from '../../components/buttons/defaultButton/defaultButtonBulder';
+import { PLAY_BUTTON_CONFIG } from '../../components/buttons/defaultButton/config';
+import { eGameEvents } from '../../systems/game/types';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
   protected _winBackground!: Sprite;
   protected _symbolsFrame!: SymbolsFrame;
   protected _messageBox!: MessageBox;
+  protected _playButton!: Button;
   protected _mode: eGameSceneModes;
 
   constructor() {
@@ -69,6 +75,22 @@ export default class GameScene extends Scene {
     this._messageBox.alpha = 0;
     this.addChild(this._messageBox);
 
+    // Play Button
+    this._playButton = ButtonFactory.button({
+      buttonBuilder: new DefaultButtonBuilder(PLAY_BUTTON_CONFIG),
+      text: 'playButton',
+      width: 200,
+      height: 50,
+    });
+    this._playButton.x = GAME_CONFIG.referenceSize.width / 2;
+    this._playButton.y = this._messageBox.y + 75;
+    this._playButton.disable();
+    this._playButton.visible = false;
+    this._playButton.on('pointerup', () =>
+      Game.bus.emit(eGameEvents.PLAY_ACTION)
+    );
+    this.addChild(this._playButton);
+
     return this;
   }
 
@@ -102,7 +124,26 @@ export default class GameScene extends Scene {
   }
 
   public onAllSymbolsRevealed() {
+    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.winState());
+    this._playButton.enable();
+    this._playButton.visible = true;
+  }
+
+  public startPlay() {
+    // Hide play button
+    this._playButton.disable();
+    this._playButton.visible = false;
+
+    // Start Play State on the screen
     this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.playState());
     this._symbolsFrame.startPlay();
+  }
+
+  public stopPlay(playResponse: iServerPlayResponse) {
+    // Hide the message box
+    this._messageBox.hide();
+
+    // Clear the screen and show the new boxes
+    this._symbolsFrame.stopPlay(playResponse);
   }
 }

@@ -10,10 +10,15 @@ import {
   eSymbolContainerEvents,
   eSymbolContainerStates,
 } from '../symbolContainer/types';
+import { iServerPlayResponse } from '../../../api/types';
+import { BubblesAnimation } from '../../particles/bubbles/bubblesAnimation';
+import gsap from 'gsap';
 
 export default class SymbolsFrame extends Container {
   protected _symbolsContainer: SymbolContainer[] = [];
+  protected _bubblesParticles: BubblesAnimation[] = [];
   protected _symbolsLayer: Container;
+  protected _bubblesLayer: Container;
   protected _config = SYMBOLS_FRAME_CONFIG;
 
   constructor() {
@@ -21,6 +26,9 @@ export default class SymbolsFrame extends Container {
 
     this._symbolsLayer = new Container();
     this.addChild(this._symbolsLayer);
+
+    this._bubblesLayer = new Container();
+    this.addChild(this._bubblesLayer);
   }
 
   public init(options: iSymbolsFrameOptions) {
@@ -46,9 +54,15 @@ export default class SymbolsFrame extends Container {
         this.onSymbolStateChanged,
         this
       );
+
+      const bubblesParticles = new BubblesAnimation();
+      bubblesParticles.x = symbolContainer.x;
+      this._bubblesParticles.push(bubblesParticles);
+      this._bubblesLayer.addChild(bubblesParticles);
     }
 
-    this._symbolsLayer.x = -GAME_CONFIG.referenceSize.width / 2;
+    this._symbolsLayer.x = this._bubblesLayer.x =
+      -GAME_CONFIG.referenceSize.width / 2;
 
     return this;
   }
@@ -77,10 +91,47 @@ export default class SymbolsFrame extends Container {
   }
 
   public async startPlay() {
-    this._symbolsContainer.forEach((symbolContainer) => {
-      symbolContainer.hide();
-    });
+    let lastPromise;
+    for (let i = 0; i < this._symbolsContainer.length; i++) {
+      if (i !== 0) await waitForTickerTime(150, Game.ticker);
+      lastPromise = this.transformSymbolsIntoBubbles(i);
+    }
+    await lastPromise;
   }
 
-  public async stopPlay() {}
+  public async transformSymbolsIntoBubbles(index: number) {
+    this._symbolsContainer[index].hide();
+    await waitForTickerTime(400, Game.ticker);
+    this._bubblesParticles[index].start();
+  }
+
+  public async removeBubblesParticles(index: number) {
+    const bubbles = this._bubblesParticles[index];
+    bubbles.setWind({ x: 1000, y: 0 });
+    await waitForTickerTime(1000, Game.ticker);
+    await gsap.to(bubbles, {
+      duration: 0.5,
+      pixi: {
+        alpha: 0,
+      },
+    });
+    bubbles.stop();
+    bubbles.setWind({ x: 0, y: 0 });
+    bubbles.alpha = 1;
+  }
+
+  public async stopPlay(playResponse: iServerPlayResponse) {
+    let lastPromise;
+    for (let i = 0; i < this._bubblesParticles.length; i++) {
+      lastPromise = this.removeBubblesParticles(i);
+    }
+
+    await lastPromise;
+
+    playResponse.play.symbols.forEach((symbolId, index) => {
+      this._symbolsContainer[index].setSymbol(symbolId);
+    });
+
+    await this.start();
+  }
 }

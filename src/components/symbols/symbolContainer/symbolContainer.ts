@@ -67,8 +67,7 @@ export default class SymbolContainer extends Container {
 
   public async hide() {
     this.state = eSymbolContainerStates.REMOVING;
-    // TODO: Hide the symbol
-    this._symbol.hide();
+    await this._symbol.hide();
     this.state = eSymbolContainerStates.REMOVED;
   }
 }

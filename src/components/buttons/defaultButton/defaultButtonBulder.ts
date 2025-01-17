@@ -5,12 +5,17 @@ import {
   StrokeInput,
   TextStyle,
 } from 'pixi.js';
-import { eButtonState, iButtonBuilder } from '../types';
-import { DEFAULT_BUTTON_CONFIG } from './config';
+import { eButtonState, iButtonBuilder, iButtonBuilderConfig } from '../types';
 import { LocaleText } from '../../text/localeText';
 import Game from '../../../systems/game/game';
 
 export default class DefaultButtonBuilder implements iButtonBuilder {
+  public config: iButtonBuilderConfig;
+
+  constructor(config: iButtonBuilderConfig) {
+    this.config = config;
+  }
+
   public getState(
     state: eButtonState,
     text: string,
@@ -33,10 +38,10 @@ export default class DefaultButtonBuilder implements iButtonBuilder {
 
   public getBackground(state: eButtonState, width: number, height: number) {
     const graphics = new Graphics();
-    const fill = DEFAULT_BUTTON_CONFIG.fill[state](width, height) as FillInput;
-    const stroke = DEFAULT_BUTTON_CONFIG.stroke[state]() as StrokeInput;
+    const fill = this.config.fill[state](width, height) as FillInput;
+    const stroke = this.config.stroke[state]() as StrokeInput;
 
-    graphics.roundRect(0, 0, width, height, DEFAULT_BUTTON_CONFIG.radius);
+    graphics.roundRect(0, 0, width, height, this.config.radius);
     graphics.fill(fill);
     graphics.stroke(stroke);
 
@@ -44,7 +49,7 @@ export default class DefaultButtonBuilder implements iButtonBuilder {
   }
 
   public getText(state: eButtonState, text: string) {
-    const textStyle = DEFAULT_BUTTON_CONFIG.textStyle[state]() as TextStyle;
+    const textStyle = this.config.textStyle[state]() as TextStyle;
     const textEl = new LocaleText({
       text,
       style: textStyle,

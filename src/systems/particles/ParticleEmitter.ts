@@ -1,6 +1,7 @@
 import {
   DestroyOptions,
   ParticleContainer,
+  PointData,
   Pool,
   Rectangle,
   Ticker,
@@ -63,6 +64,23 @@ export class ParticleEmitter extends ParticleContainer {
 
   public get ticker() {
     return this._ticker;
+  }
+
+  public set wind(value: PointData) {
+    this._environment.windX = value.x;
+    this._environment.windY = value.y;
+  }
+
+  public set gravity(value: number) {
+    this._environment.gravity = value;
+  }
+
+  public set airResistance(value: number) {
+    this._environment.airResistance = value;
+  }
+
+  public set affectSurface(value: boolean) {
+    this._environment.affectSurface = value;
   }
 
   /**
@@ -372,7 +390,6 @@ export class ParticleEmitter extends ParticleContainer {
       this._pool.return(particleItem);
     });
     this.removeParticles(0, this.particleChildren.length);
-    console.log(this.particleChildren);
   }
 
   /**

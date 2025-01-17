@@ -5,6 +5,7 @@ import gsap from 'gsap';
 import { LocaleText } from '../../components/text/localeText';
 import ButtonFactory from '../../components/buttons/buttonFactory';
 import DefaultButtonBuilder from '../../components/buttons/defaultButton/defaultButtonBulder';
+import { DEFAULT_BUTTON_CONFIG } from '../../components/buttons/defaultButton/config';
 
 export default class LoadingScene extends Scene {
   protected _background!: Sprite;
@@ -106,7 +107,7 @@ export default class LoadingScene extends Scene {
 
     // Add the start button
     const startButton = ButtonFactory.button({
-      buttonBuilder: new DefaultButtonBuilder(),
+      buttonBuilder: new DefaultButtonBuilder(DEFAULT_BUTTON_CONFIG),
       text: 'startButton',
       width: 200,
       height: 50,

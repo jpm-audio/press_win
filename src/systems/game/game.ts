@@ -73,6 +73,7 @@ export default class Game {
   public async init() {
     // First init Error notification system
     Game._bus.on(eGameEvents.ERROR, this.onError, this);
+    Game._bus.on(eGameEvents.PLAY_ACTION, this.onPlayAction, this);
 
     // Second try to create a server connexion and retrieve init response for the game
     const initResponse = await Game._gameServer.init();
@@ -156,6 +157,17 @@ export default class Game {
 
     await prevScene?.close();
     this._layerGame.removeChild(prevScene);
+  }
+
+  public async onPlayAction() {
+    const scene = this._currentScene as GameScene;
+    if (scene !== null && scene.startPlay !== undefined) {
+      scene.startPlay();
+
+      const playResponse = await Game._gameServer.play();
+
+      scene.stopPlay(playResponse);
+    }
   }
 
   public onError(event: iGameEventErrorInfo) {

@@ -19,6 +19,7 @@ export enum eGameEvents {
   LOADED = 'gameEventLoaded',
   READY = 'gameEventReady',
   IDLE = 'gameEventIdle',
+  PLAY_ACTION = 'gameEventPlayAction',
   ERROR = 'gameEventError',
 }
 

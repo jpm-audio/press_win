@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Container, PointData } from 'pixi.js';
 import { ParticleEmitter } from '../../../systems/particles/ParticleEmitter';
 import { BUBBLES_PARTICLES_CONFIG } from './configs/bubblesConfig';
 
@@ -15,6 +15,10 @@ export class BubblesAnimation extends Container {
     this._emitter = new ParticleEmitter(BUBBLES_PARTICLES_CONFIG);
 
     this.addChild(this._emitter);
+  }
+
+  public setWind(value: PointData) {
+    this._emitter.wind = value;
   }
 
   public start() {
