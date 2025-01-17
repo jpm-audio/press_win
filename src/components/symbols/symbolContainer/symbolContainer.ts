@@ -1,5 +1,5 @@
 import { Container } from 'pixi.js';
-import GiftBox from '../giftBox.ts/giftBox';
+import GiftBox from '../giftBox/giftBox';
 import SymbolFactory from '../symbol/symbolFactory';
 
 export default class SymbolContainer extends Container {

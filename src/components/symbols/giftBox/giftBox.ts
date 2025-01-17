@@ -1,4 +1,4 @@
-import { Container, Point, Sprite } from 'pixi.js';
+import { Container, Point, Rectangle, Sprite } from 'pixi.js';
 import TextureFactory from '../../textures/textureFactory';
 import {
   GIFT_BOX_SHAKE_ANIMATION_OPTIONS,
@@ -33,6 +33,7 @@ export default class GiftBox extends Container {
   constructor() {
     super();
 
+    // Create all the elements
     this._shadow = new Sprite(TextureFactory.giftBoxShadow());
     this._shadow.anchor.set(0.5);
     this._shadow.position.copyFrom(this._settings.shadow.position);
@@ -54,6 +55,7 @@ export default class GiftBox extends Container {
     this._shine.blendMode = 'add';
     this.addChild(this._shine);
 
+    // Create and set the animations
     this._moveAnimation = new TargetShadowAnimation(
       this._giftBox,
       this._shadow,
@@ -65,6 +67,11 @@ export default class GiftBox extends Container {
       GIFT_BOX_SHAKE_ANIMATION_OPTIONS()
     );
 
+    // Events:
+    // a - Set the hit are for the interaction
+    // b - Set the press event listener
+    const hitFrame = new Rectangle(-80, -80, 160, 160);
+    this._giftBox.hitArea = hitFrame;
     this._giftBox.on('pointerdown', () => this.hide());
   }
 
