@@ -1,6 +1,32 @@
 {
   "translation": {
     "loading": "Loading",
-    "startButton": "Start"
+    "startButton": "Start",
+    "playButton": "Play",
+    "initialMessage1": "Welcome to the Magic Box Challenge! Ready to test your luck?",
+    "initialMessage2": "Click the boxes and discover the prizes waiting for you. Good luck!",
+    "initialMessage3": "Three boxes, three chances – will you hit the jackpot?",
+    "initialMessage4": "Let the fun begin: Open the boxes and reveal your fate!",
+    "initialMessage5": "Get ready to play! What surprises are hidden in the boxes today?",
+    "playMessage1": "The boxes are coming!",
+    "playMessage2": "Get ready to reveal your luck!",
+    "playMessage3": "Here come the boxes!",
+    "playMessage4": "The game begins – watch closely!",
+    "playMessage5": "Your symbols are on their way!",
+    "playMessage6": "Boxes loading... what’s inside?",
+    "playMessage7": "Get set – the boxes are appearing!",
+    "playMessage8": "Your next chance is coming up!",
+    "playMessage9": "The excitement builds – here they are!",
+    "playMessage10": "The boxes are arriving – let’s go!",
+    "winMessage1": "Congratulations! You’ve won {{prizeAmount}}!",
+    "winMessage2": "You did it! A big win of {{prizeAmount}} for you!",
+    "winMessage3": "Jackpot! Enjoy your prize of {{prizeAmount}}!",
+    "winMessage4": "You’re a winner! You’ve earned {{prizeAmount}}!",
+    "winMessage5": "Victory is yours! You’ve won {{prizeAmount}}!",
+    "winMessage6": "What a win! Celebrate your {{prizeAmount}} prize!",
+    "winMessage7": "Winner alert! You’ve gained {{prizeAmount}}!",
+    "winMessage8": "Fantastic! You hit the prize of {{prizeAmount}}!",
+    "winMessage9": "Luck is on your side! You’ve won {{prizeAmount}}!",
+    "winMessage10": "Amazing result! Congratulations on your {{prizeAmount}} win!"
   }
 }

@@ -1,15 +1,19 @@
-import { Color, Sprite } from 'pixi.js';
+import { Color, Sprite, TextStyleOptions } from 'pixi.js';
 import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
 import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
 import { GAME_CONFIG } from '../../systems/game/config';
 import { iServerInitResponse } from '../../api/types';
+import MessageBox from '../../components/messageBox/messageBox';
+import { MESSAGE_BOX_CONFIG } from './config';
+import Game from '../../systems/game/game';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
   protected _winBackground!: Sprite;
   protected _symbolsFrame!: SymbolsFrame;
+  protected _messageBox!: MessageBox;
   protected _mode: eGameSceneModes;
 
   constructor() {
@@ -44,10 +48,27 @@ export default class GameScene extends Scene {
     this._symbolsFrame.y = GAME_CONFIG.referenceSize.height / 2;
     this.addChild(this._symbolsFrame);
 
+    // Message Box
+    this._messageBox = new MessageBox({
+      showTime: MESSAGE_BOX_CONFIG.showTime,
+      hideTime: MESSAGE_BOX_CONFIG.hideTime,
+      textOptions: {
+        text: '',
+        style: MESSAGE_BOX_CONFIG.textStyle as TextStyleOptions,
+        resolution: Game.game.assetsResolution,
+      },
+    });
+    this._messageBox.x = GAME_CONFIG.referenceSize.width / 2;
+    this._messageBox.y = (3 * GAME_CONFIG.referenceSize.height) / 4;
+    this._messageBox.alpha = 0;
+    this.addChild(this._messageBox);
+
     return this;
   }
 
   public async start() {
+    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.initialState());
+    this._messageBox.show();
     await this._symbolsFrame.start();
   }
 
