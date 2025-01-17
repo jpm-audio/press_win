@@ -1,6 +1,6 @@
 import { iAnimationTargetState } from '../animation/types';
 
-export interface iFallDownAnimationOptions {
+export interface iTargetShadowAnimationOptions {
   duration: number;
   easing: string;
   target: {

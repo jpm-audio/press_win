@@ -4,6 +4,7 @@ import { eGameSceneModes } from './types';
 import gsap from 'gsap';
 import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
 import { GAME_CONFIG } from '../../systems/game/config';
+import { iServerInitResponse } from '../../api/types';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
@@ -16,7 +17,7 @@ export default class GameScene extends Scene {
     this._mode = eGameSceneModes.GAME;
   }
 
-  public init() {
+  public init(initResponse: iServerInitResponse) {
     this._id = 'Game Scene';
     // Background
     this._background = this._getBackground([
@@ -34,12 +35,20 @@ export default class GameScene extends Scene {
     this._winBackground.alpha = 0;
 
     // Symbols Frame
-    this._symbolsFrame = new SymbolsFrame().init();
+    this._symbolsFrame = new SymbolsFrame().init({
+      numSymbols: initResponse.play.symbols.length,
+      symbolTypes: initResponse.definition.symbols,
+      initialState: initResponse.play.symbols,
+    });
     this._symbolsFrame.x = GAME_CONFIG.referenceSize.width / 2;
     this._symbolsFrame.y = GAME_CONFIG.referenceSize.height / 2;
     this.addChild(this._symbolsFrame);
 
     return this;
+  }
+
+  public async start() {
+    await this._symbolsFrame.start();
   }
 
   public async modeTo(mode: eGameSceneModes, duration: number = 0.5) {

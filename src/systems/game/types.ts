@@ -18,4 +18,9 @@ export enum eGameEvents {
   LOADING = 'gameEventLoading',
   LOADED = 'gameEventLoaded',
   READY = 'gameEventReady',
+  ERROR = 'gameEventError',
+}
+
+export interface iGameEventErrorInfo {
+  error: string;
 }

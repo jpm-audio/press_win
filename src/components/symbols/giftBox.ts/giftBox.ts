@@ -8,7 +8,7 @@ import {
   GIFT_C2A_UP_ANIMATION_OPTIONS,
   GIFT_HIDE_ANIMATION_OPTIONS,
 } from './config';
-import FallDownAnimation from '../../../animations/fallDownAnimation/fallDownAnimation';
+import TargetShadowAnimation from '../../../animations/targetShadowAnimation/targetShadowAnimation';
 import ShakeAnimation from '../../../animations/shakeAnimation/shakeAnimation';
 import { SmokeAnimation } from '../../particles/smoke/smokeAnimation';
 import waitForTickerTime from '../../../utils/waitForTickerTime';
@@ -20,7 +20,7 @@ export default class GiftBox extends Container {
   protected _shadow: Sprite;
   protected _giftBox: Sprite;
   protected _shine: Sprite;
-  protected _moveAnimation!: FallDownAnimation;
+  protected _moveAnimation!: TargetShadowAnimation;
   protected _shakeAnimation!: ShakeAnimation;
   protected _smokeAnimation!: SmokeAnimation;
   protected _settings = {
@@ -36,10 +36,11 @@ export default class GiftBox extends Container {
     this._shadow = new Sprite(TextureFactory.giftBoxShadow());
     this._shadow.anchor.set(0.5);
     this._shadow.position.copyFrom(this._settings.shadow.position);
-    this._shadow.alpha = this._settings.shadow.alpha;
+    this._shadow.alpha = 0;
     this.addChild(this._shadow);
 
     this._giftBox = Sprite.from('s11.png');
+    this._giftBox.alpha = 0;
     this._giftBox.anchor.set(0.5);
     this.addChild(this._giftBox);
 
@@ -53,7 +54,7 @@ export default class GiftBox extends Container {
     this._shine.blendMode = 'add';
     this.addChild(this._shine);
 
-    this._moveAnimation = new FallDownAnimation(
+    this._moveAnimation = new TargetShadowAnimation(
       this._giftBox,
       this._shadow,
       GIFT_BOX_SHOW_ANIMATION_OPTIONS
@@ -64,8 +65,7 @@ export default class GiftBox extends Container {
       GIFT_BOX_SHAKE_ANIMATION_OPTIONS()
     );
 
-    this.eventMode = 'static';
-    this.on('pointerdown', () => this.hide());
+    this._giftBox.on('pointerdown', () => this.hide());
   }
 
   public async show() {
@@ -73,6 +73,7 @@ export default class GiftBox extends Container {
     this._moveAnimation.options = GIFT_BOX_SHOW_ANIMATION_OPTIONS;
     await this._moveAnimation.start();
     await this._shakeAnimation.start();
+    this.enable();
   }
 
   public async callToAction() {
@@ -106,7 +107,7 @@ export default class GiftBox extends Container {
   }
 
   public async hide() {
-    this.eventMode = 'none';
+    this.disable();
 
     // Box Explode
     this.explode();
@@ -123,6 +124,15 @@ export default class GiftBox extends Container {
 
     // End
     this._smokeAnimation.stop();
-    this.eventMode = 'static';
+  }
+
+  public enable() {
+    this._giftBox.eventMode = 'static';
+    this._giftBox.cursor = 'pointer';
+  }
+
+  public disable() {
+    this._giftBox.eventMode = 'none';
+    this._giftBox.cursor = 'default';
   }
 }

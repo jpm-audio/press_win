@@ -1,17 +1,17 @@
 import gsap from 'gsap';
 import { TPixiElement } from '../../systems/game/types';
 import TweenAnimation from '../animation/tweenAnimation';
-import { iFallDownAnimationOptions } from './types';
+import { iTargetShadowAnimationOptions } from './types';
 
 export default class FallDownAnimation extends TweenAnimation {
-  public options: iFallDownAnimationOptions;
+  public options: iTargetShadowAnimationOptions;
   public target: TPixiElement;
   public shadow: TPixiElement;
 
   constructor(
     target: TPixiElement,
     shadow: TPixiElement,
-    options: iFallDownAnimationOptions
+    options: iTargetShadowAnimationOptions
   ) {
     super();
     this.target = target;

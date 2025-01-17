@@ -6,13 +6,17 @@ import Scene from '../../scenes/scene/scene';
 import { GAME_CONFIG } from './config';
 import LoadManager from '../loader/loadManager';
 import GameScene from '../../scenes/game/gameScene';
-import { eGameEvents } from './types';
+import { eGameEvents, iGameEventErrorInfo } from './types';
+import GameServer from '../../api/gameServer';
+import { eGameClientErrors } from './errors';
+import { iServerInitResponse } from '../../api/types';
 
 export default class Game {
   private static _instance: Game;
   private static _bus: EventEmitter;
   private static _environment: Environment;
   private static _app: Application;
+  private static _gameServer: GameServer;
   private _currentScene!: Scene;
   private _assetsResolution!: number;
   private _assetsResolutionIndex!: number;
@@ -48,6 +52,8 @@ export default class Game {
     Game._bus = new EventEmitter();
     Game._environment = environment;
     Game._app = app;
+    Game._gameServer = new GameServer();
+
     return Game.game.init();
   }
 
@@ -65,6 +71,18 @@ export default class Game {
   constructor() {}
 
   public async init() {
+    // First init Error notification system
+    Game._bus.on(eGameEvents.ERROR, this.onError, this);
+
+    // Second try to create a server connexion and retrieve init response for the game
+    const initResponse = await Game._gameServer.init();
+    if (initResponse === null) {
+      Game.bus.emit(eGameEvents.ERROR, {
+        error: eGameClientErrors.SERVER_INIT_FAILS,
+      });
+      return;
+    }
+
     // Game Resolution
     this._assetsResolutionIndex = GAME_CONFIG.getAssetsResolutionIndex(
       Game.environment.referenceMaxCanvasSize
@@ -89,6 +107,10 @@ export default class Game {
     // Preloading...
     await this._loader.loadByBundleIndex(0);
 
+    this.load(initResponse);
+  }
+
+  public async load(initResponse: iServerInitResponse) {
     // <-> Change Preloading Scene to Loading Scene
     const loadingScene = new LoadingScene();
     loadingScene.init();
@@ -96,17 +118,19 @@ export default class Game {
     Game.bus.emit(eGameEvents.LOADING);
 
     // Loading...
-    this._loader
-      .loadByBundleIndex(1, (progress) => loadingScene.progressTo(progress))
-      .then(async () => {
-        Game.bus.emit(eGameEvents.LOADED);
-        // <-> Change Loading Scene to Game Scene
-        const gameScene = new GameScene().init();
-        await loadingScene.waitForStartAction();
-        await this._setScene(gameScene);
-        // Start Game
-        Game.bus.emit(eGameEvents.READY);
-      });
+    await this._loader.loadByBundleIndex(1, (progress) =>
+      loadingScene.progressTo(progress)
+    );
+
+    // <-> Change Loading Scene to Game Scene
+    const gameScene = new GameScene().init(initResponse);
+    await loadingScene.waitForStartAction();
+    await this._setScene(gameScene);
+
+    // Start Game
+    Game.bus.emit(eGameEvents.READY);
+
+    gameScene.start();
   }
 
   protected _watchResize() {
@@ -132,6 +156,10 @@ export default class Game {
 
     await prevScene?.close();
     this._layerGame.removeChild(prevScene);
+  }
+
+  public onError(event: iGameEventErrorInfo) {
+    alert(event.error);
   }
 
   public onScreenResize() {

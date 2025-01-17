@@ -1,7 +1,7 @@
-import { iFallDownAnimationOptions } from '../../../animations/fallDownAnimation/types';
 import { iShakeAnimationOptions } from '../../../animations/shakeAnimation/types';
+import { iTargetShadowAnimationOptions } from '../../../animations/targetShadowAnimation/types';
 
-export const GIFT_BOX_SHOW_ANIMATION_OPTIONS: iFallDownAnimationOptions = {
+export const GIFT_BOX_SHOW_ANIMATION_OPTIONS: iTargetShadowAnimationOptions = {
   duration: 0.5,
   easing: 'power1.in',
   target: {
@@ -54,11 +54,11 @@ export const GIFT_C2A_UP_ANIMATION_OPTIONS = {
   },
   shadow: {
     from: {
-      alpha: 1,
+      alpha: 0.5,
       scale: 1,
     },
     to: {
-      alpha: 0.9,
+      alpha: 0.4,
       scale: 1.5,
     },
   },
@@ -77,11 +77,11 @@ export const GIFT_C2A_DOWN_ANIMATION_OPTIONS = {
   },
   shadow: {
     from: {
-      alpha: 0.9,
+      alpha: 0.4,
       scale: 1.5,
     },
     to: {
-      alpha: 1,
+      alpha: 0.5,
       scale: 1,
     },
   },
@@ -117,7 +117,7 @@ export const GIFT_HIDE_ANIMATION_OPTIONS = {
   },
   shadow: {
     from: {
-      alpha: 1,
+      alpha: 0.5,
       scale: 1,
     },
     to: {
