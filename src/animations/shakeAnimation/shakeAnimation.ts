@@ -1,7 +1,7 @@
 import gsap from 'gsap';
 import { TPixiElement } from '../../systems/game/types';
 import TweenAnimation from '../animation/tweenAnimation';
-import { iShakeAnimationOptions } from './types';
+import { iShakeAnimationOptions, TSignStart } from './types';
 
 export default class ShakeAnimation extends TweenAnimation {
   public options: iShakeAnimationOptions;
@@ -10,7 +10,7 @@ export default class ShakeAnimation extends TweenAnimation {
     x: 1,
     y: 0,
   };
-  public signStart: 'minus' | 'plus' | 'random' = 'random';
+  public signStart: TSignStart = 'minus';
 
   constructor(target: TPixiElement, options: iShakeAnimationOptions) {
     super();
