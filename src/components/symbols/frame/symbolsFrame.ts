@@ -1,11 +1,15 @@
 import { Container } from 'pixi.js';
 import { GAME_CONFIG } from '../../../systems/game/config';
 import SymbolContainer from '../symbolContainer/symbolContainer';
-import { iSymbolsFrameOptions } from './types';
+import { eSymbolsFrameEvents, iSymbolsFrameOptions } from './types';
 import SymbolFactory from '../symbol/symbolFactory';
 import waitForTickerTime from '../../../utils/waitForTickerTime';
 import Game from '../../../systems/game/game';
 import { SYMBOLS_FRAME_CONFIG } from './config';
+import {
+  eSymbolContainerEvents,
+  eSymbolContainerStates,
+} from '../symbolContainer/types';
 
 export default class SymbolsFrame extends Container {
   protected _symbolsContainer: SymbolContainer[] = [];
@@ -34,13 +38,33 @@ export default class SymbolsFrame extends Container {
     for (let i = 0; i < numSymbols; i++) {
       const symbolContainer = new SymbolContainer();
       symbolContainer.x = xDistance * (i + 1);
+      symbolContainer.setSymbol(options.initialState[i]);
       this._symbolsContainer.push(symbolContainer);
       this._symbolsLayer.addChild(symbolContainer);
+      symbolContainer.on(
+        eSymbolContainerEvents.STATE_CHANGED,
+        this.onSymbolStateChanged,
+        this
+      );
     }
 
     this._symbolsLayer.x = -GAME_CONFIG.referenceSize.width / 2;
 
     return this;
+  }
+
+  public onSymbolStateChanged(state: eSymbolContainerStates) {
+    if (state === eSymbolContainerStates.REVEALED) {
+      let revealed = 0;
+      this._symbolsContainer.forEach((symbolContainer) => {
+        if (symbolContainer.state === eSymbolContainerStates.REVEALED)
+          revealed++;
+      });
+
+      if (revealed === this._symbolsContainer.length) {
+        this.emit(eSymbolsFrameEvents.ALL_SYMBOLS_REVEALED);
+      }
+    }
   }
 
   public async start() {
@@ -52,5 +76,11 @@ export default class SymbolsFrame extends Container {
     await lastPromise;
   }
 
-  public async play() {}
+  public async startPlay() {
+    this._symbolsContainer.forEach((symbolContainer) => {
+      symbolContainer.hide();
+    });
+  }
+
+  public async stopPlay() {}
 }

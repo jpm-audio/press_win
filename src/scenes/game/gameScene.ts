@@ -8,6 +8,7 @@ import { iServerInitResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
 import { MESSAGE_BOX_CONFIG } from './config';
 import Game from '../../systems/game/game';
+import { eSymbolsFrameEvents } from '../../components/symbols/frame/types';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
@@ -46,6 +47,11 @@ export default class GameScene extends Scene {
     });
     this._symbolsFrame.x = GAME_CONFIG.referenceSize.width / 2;
     this._symbolsFrame.y = GAME_CONFIG.referenceSize.height / 2;
+    this._symbolsFrame.on(
+      eSymbolsFrameEvents.ALL_SYMBOLS_REVEALED,
+      this.onAllSymbolsRevealed,
+      this
+    );
     this.addChild(this._symbolsFrame);
 
     // Message Box
@@ -93,5 +99,10 @@ export default class GameScene extends Scene {
         },
       });
     }
+  }
+
+  public onAllSymbolsRevealed() {
+    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.playState());
+    this._symbolsFrame.startPlay();
   }
 }

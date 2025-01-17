@@ -15,6 +15,7 @@ import waitForTickerTime from '../../../utils/waitForTickerTime';
 import { SMOKE_PARTICLES_CONFIG } from '../../particles/smoke/configs/smokeConfig';
 import Game from '../../../systems/game/game';
 import gsap from 'gsap';
+import { eGiftBoxEvents } from './types';
 
 export default class GiftBox extends Container {
   protected _shadow: Sprite;
@@ -72,7 +73,11 @@ export default class GiftBox extends Container {
     // b - Set the press event listener
     const hitFrame = new Rectangle(-80, -80, 160, 160);
     this._giftBox.hitArea = hitFrame;
-    this._giftBox.on('pointerdown', () => this.hide());
+    this._giftBox.on('pointerdown', () => this._onPress());
+  }
+
+  protected _onPress() {
+    this.emit(eGiftBoxEvents.PRESS);
   }
 
   public async show() {
@@ -111,6 +116,8 @@ export default class GiftBox extends Container {
     });
 
     await Promise.all([movePromise, shinePromise]);
+
+    this.emit(eGiftBoxEvents.SHOWN);
   }
 
   public async hide() {
@@ -131,6 +138,8 @@ export default class GiftBox extends Container {
 
     // End
     this._smokeAnimation.stop();
+
+    this.emit(eGiftBoxEvents.HIDDEN);
   }
 
   public enable() {
