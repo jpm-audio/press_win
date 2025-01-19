@@ -176,19 +176,23 @@ export default class Game {
 
   public onScreenResize() {
     // Calculate the proper scale to fit the current size.
-    const sizeReference = Game.environment.isPortrait
-      ? Game._app.canvas.width
-      : Game._app.canvas.height;
-    const scale =
-      sizeReference /
-      GAME_CONFIG.referenceSize.height /
-      Game.environment.canvasResolution;
+    let scale = 1;
+    const referenceAR =
+      GAME_CONFIG.referenceSize.width / GAME_CONFIG.referenceSize.height;
+    const hasCalculationToWidth = Game.environment.viewportAR < referenceAR;
 
-    const drawSize = Game.environment.isPortrait
+    if (hasCalculationToWidth) {
+      scale = Game._app.canvas.width / GAME_CONFIG.referenceSize.width;
+    } else {
+      scale = Game._app.canvas.height / GAME_CONFIG.referenceSize.height;
+    }
+
+    scale /= Game.environment.canvasResolution;
+
+    const drawSize = hasCalculationToWidth
       ? {
-          width: GAME_CONFIG.referenceSize.height,
-          height:
-            GAME_CONFIG.referenceSize.height / Game.environment.viewportAR,
+          width: GAME_CONFIG.referenceSize.width,
+          height: GAME_CONFIG.referenceSize.width / Game.environment.viewportAR,
         }
       : {
           width: GAME_CONFIG.referenceSize.height * Game.environment.viewportAR,
@@ -196,6 +200,8 @@ export default class Game {
         };
 
     this._layerGame.scale.set(scale);
+
+    // Center the game layer by the reference frame into the draw frame
     this._layerGame.x =
       ((drawSize.width - GAME_CONFIG.referenceSize.width) / 2) * scale;
     this._layerGame.y =
