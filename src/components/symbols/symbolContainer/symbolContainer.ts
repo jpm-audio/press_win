@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Container, PointData } from 'pixi.js';
 import GiftBox from '../giftBox/giftBox';
 import SymbolFactory from '../symbol/symbolFactory';
 import { eGiftBoxEvents } from '../giftBox/types';
@@ -126,5 +126,16 @@ export default class SymbolContainer extends FadeContainer {
    */
   public async symbolReduce(duration?: number) {
     await this._symbol.reduce(duration);
+  }
+
+  /**
+   * Called for animating the symbol container move to a point for a collistion
+   *
+   * @param position
+   */
+  public async symbolCollision(position: PointData) {
+    await this._symbol.floatingAnimation.stop();
+    await this.positionTo(position, 1, 'power3.in');
+    await this.symbolExplode();
   }
 }

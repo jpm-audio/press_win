@@ -1,4 +1,7 @@
+import { iWinCounterOptions } from '../../components/display/winCounter/types';
+import { amountToString } from '../../utils/amountToString';
 import { iGameConfig } from './types';
+import { BitmapText, Ticker } from 'pixi.js';
 
 export const GAME_CONFIG: iGameConfig = {
   referenceSize: {
@@ -10,7 +13,7 @@ export const GAME_CONFIG: iGameConfig = {
   audioBasePath: 'assets/audio/',
   getAssetsInitOptions: (resolutionSufix: string) => {
     return {
-      basePath: 'assets/sprites/',
+      basePath: 'assets/',
       manifest: {
         bundles: [
           {
@@ -18,7 +21,7 @@ export const GAME_CONFIG: iGameConfig = {
             assets: [
               {
                 alias: 'loaderAssets',
-                src: `loader-${resolutionSufix}.json`,
+                src: `sprites/loader-${resolutionSufix}.json`,
               },
             ],
           },
@@ -27,7 +30,11 @@ export const GAME_CONFIG: iGameConfig = {
             assets: [
               {
                 alias: 'gameAssets',
-                src: `game-${resolutionSufix}.json`,
+                src: `sprites/game-${resolutionSufix}.json`,
+              },
+              {
+                alias: 'ladyLuck',
+                src: 'bitmapfonts/lady_luck/lady_luck.xml',
               },
             ],
           },
@@ -50,4 +57,17 @@ export const GAME_CONFIG: iGameConfig = {
     }
     return index;
   },
+};
+
+export const WIN_COUNTER_OPTIONS: iWinCounterOptions = {
+  ticker: new Ticker(),
+  valueParser: (value) => amountToString(value as number, 2),
+  content: new BitmapText({
+    text: '',
+    style: {
+      fontFamily: 'lady-luck',
+      fontSize: 55,
+      align: 'left',
+    },
+  }),
 };

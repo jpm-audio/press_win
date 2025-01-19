@@ -6,30 +6,33 @@ import {
 import { CoinParticle } from '../coinParticle';
 import { GAME_CONFIG } from '../../../../systems/game/config';
 
+const COINS_SIZE = 100;
+const FRAME = new Rectangle(
+  -GAME_CONFIG.referenceSize.width / 2 - COINS_SIZE,
+  -GAME_CONFIG.referenceSize.height / 2 - COINS_SIZE,
+  GAME_CONFIG.referenceSize.width + 2 * COINS_SIZE,
+  GAME_CONFIG.referenceSize.height + 2 * COINS_SIZE
+);
+
 export const COINS_RAIN_PARTICLES_CONFIG: iParticleEmitterOptions = {
   ClassType: CoinParticle,
-  initialSize: 125,
+  initialSize: 75,
   spawnOptions: {
     position: {
-      x: [-100, 100],
-      y: [-100, 100],
-      velocityX: [-200, 200] as TParticleOptionRange,
-      velocityY: [-200, 200] as TParticleOptionRange,
+      x: [FRAME.x, FRAME.x + FRAME.width],
+      y: FRAME.y,
+      velocityY: [1000, 500] as TParticleOptionRange,
     },
-    scale: [0.05, 0.2],
+    scale: [0.25, 0.5],
+    rotation: {
+      value: [-Math.PI / 2, Math.PI / 2] as TParticleOptionRange,
+      velocity: [-Math.PI, Math.PI] as TParticleOptionRange,
+    },
+    color: 0xdddddd,
   },
-  contentFrame: new Rectangle(
-    -GAME_CONFIG.referenceSize.width / 2,
-    -GAME_CONFIG.referenceSize.height / 2,
-    GAME_CONFIG.referenceSize.width,
-    GAME_CONFIG.referenceSize.height
-  ),
+  contentFrame: FRAME,
   updateOptions: {
-    environment: {
-      airResistance: 0.1,
-    },
-    spawnDuration: 250,
-    spawnRate: { value: 500 },
+    spawnRate: { value: 50 },
     interval: 32,
   },
 };

@@ -6,30 +6,32 @@ import {
 import { CoinParticle } from '../coinParticle';
 import { GAME_CONFIG } from '../../../../systems/game/config';
 
+const COINS_SIZE = 100;
+
 export const COINS_FOUNTAIN_PARTICLES_CONFIG: iParticleEmitterOptions = {
   ClassType: CoinParticle,
-  initialSize: 125,
+  initialSize: 250,
   spawnOptions: {
     position: {
-      x: [-100, 100],
-      y: [-100, 100],
+      x: [-10, 10],
+      y: [-10, 10],
       velocityX: [-200, 200] as TParticleOptionRange,
-      velocityY: [-200, 200] as TParticleOptionRange,
+      velocityY: [-750, -150] as TParticleOptionRange,
+      accelerationX: [-150, 150] as TParticleOptionRange,
     },
-    scale: [0.05, 0.2],
+    scale: [0.25, 0.5],
   },
   contentFrame: new Rectangle(
-    -GAME_CONFIG.referenceSize.width / 2,
-    -GAME_CONFIG.referenceSize.height / 2,
-    GAME_CONFIG.referenceSize.width,
-    GAME_CONFIG.referenceSize.height
+    -GAME_CONFIG.referenceSize.width / 2 - COINS_SIZE,
+    -GAME_CONFIG.referenceSize.height / 2 - COINS_SIZE,
+    GAME_CONFIG.referenceSize.width + 2 * COINS_SIZE,
+    GAME_CONFIG.referenceSize.height + 2 * COINS_SIZE
   ),
   updateOptions: {
     environment: {
-      airResistance: 0.1,
+      gravity: 750,
     },
-    spawnDuration: 250,
-    spawnRate: { value: 500 },
+    spawnRate: { value: 30 },
     interval: 32,
   },
 };

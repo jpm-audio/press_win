@@ -1,8 +1,9 @@
-import { Container, PointData } from 'pixi.js';
+import { PointData } from 'pixi.js';
 import { ParticleEmitter } from '../../../systems/particles/ParticleEmitter';
 import { iParticleEmitterOptions } from '../../../systems/particles/types';
+import FadeContainer from '../../fadeContainer/fadeContainer';
 
-export class CoinsFountainAnimation extends Container {
+export class CoinsAnimation extends FadeContainer {
   protected _emitter: ParticleEmitter;
 
   public get ticker() {
@@ -11,6 +12,10 @@ export class CoinsFountainAnimation extends Container {
 
   public get isPlaying() {
     return this._emitter.isRunning;
+  }
+
+  public get emitter() {
+    return this._emitter;
   }
 
   constructor(options: iParticleEmitterOptions) {
@@ -26,10 +31,14 @@ export class CoinsFountainAnimation extends Container {
   }
 
   public start() {
+    this.alpha = 1;
+    this.visible = true;
     this._emitter.start(true);
   }
 
-  public stop() {
+  public async stop() {
+    this._emitter.spawn = false;
+    await this.hide();
     this._emitter.stop();
   }
 }

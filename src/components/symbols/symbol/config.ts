@@ -31,7 +31,7 @@ export const SYMBOL_REDUCE_ANIMATION_OPTIONS = {
     scaleX: 0,
     scaleY: 0,
   },
-  ease: 'expo.in',
+  ease: 'power1.in',
 };
 
 export const SHINE_ANIMATION_OPTIONS = {

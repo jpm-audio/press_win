@@ -55,11 +55,17 @@ export default class FloatingAnimation extends TweenAnimation {
     this._currentTween = null;
 
     await gsap.to(this.target, {
-      duration: this.options.duration,
+      duration: this.options.duration / 2,
       pixi: {
         y: 0,
       },
       ease: this.options.easing,
     });
+  }
+
+  public kill() {
+    if (this._currentTween) this._currentTween.kill();
+    this._currentTween = null;
+    this.target.y = 0;
   }
 }

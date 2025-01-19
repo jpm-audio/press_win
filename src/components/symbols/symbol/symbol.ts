@@ -29,6 +29,10 @@ export default class Symbol extends Container {
     return this._symbolType;
   }
 
+  public get floatingAnimation() {
+    return this._floatingAnimation;
+  }
+
   public set symbolType(symbolType: string) {
     this._symbolType = symbolType;
     this._symbol.texture = Texture.from(`${symbolType}.png`);
@@ -122,7 +126,6 @@ export default class Symbol extends Container {
    */
   public async explode() {
     // Symbol & Bubble Scale Up
-    const floatinStopPromise = this._floatingAnimation.stop();
     const shinePromise = gsap.to(this._shine, SHINE_ANIMATION_OPTIONS);
     const symbolHidePromise = this._showHideAnimation(
       SYMBOL_EXPLODE_ANIMATION_OPTIONS
@@ -131,10 +134,9 @@ export default class Symbol extends Container {
     await Promise.all([shinePromise, symbolHidePromise]);
 
     // Symbol & Bubble Disappear
+    this._floatingAnimation.kill();
     this._floatingLayer.scale.set(0);
     this._shine.alpha = 0;
-
-    await floatinStopPromise;
   }
 
   /**
@@ -142,7 +144,7 @@ export default class Symbol extends Container {
    */
   public async disolve() {
     await this._showHideAnimation(SYMBOL_DISOLVE_ANIMATION_OPTIONS);
-    this._floatingAnimation.stop();
+    this._floatingAnimation.kill();
   }
 
   /**
@@ -153,7 +155,7 @@ export default class Symbol extends Container {
       ...SYMBOL_REDUCE_ANIMATION_OPTIONS,
       ...{ duration },
     });
-    await this._floatingAnimation.stop();
+    this._floatingAnimation.kill();
   }
 
   /**
@@ -161,6 +163,6 @@ export default class Symbol extends Container {
    */
   public reset() {
     this._cancelShowHideAnimation();
-    this._floatingAnimation.stop();
+    this._floatingAnimation.kill();
   }
 }

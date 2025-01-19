@@ -239,17 +239,7 @@ export default class SymbolsFrame extends Container {
         y: 0,
       };
       winSymbols.forEach((symbolContainer) => {
-        lastPromise = symbolContainer.positionTo(
-          centerPosition,
-          1,
-          'power1.in'
-        );
-      });
-      await lastPromise;
-
-      // Win Symbols Explode
-      winSymbols.forEach((symbolContainer) => {
-        lastPromise = symbolContainer.symbolExplode();
+        lastPromise = symbolContainer.symbolCollision(centerPosition);
       });
 
       await lastPromise;

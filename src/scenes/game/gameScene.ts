@@ -3,7 +3,7 @@ import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
 import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
-import { GAME_CONFIG } from '../../systems/game/config';
+import { GAME_CONFIG, WIN_COUNTER_OPTIONS } from '../../systems/game/config';
 import { iServerInitResponse, iServerPlayResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
 import { GAME_MESSAGES, MESSAGE_BOX_CONFIG } from './config';
@@ -20,12 +20,20 @@ import {
   iGameEventErrorInfo,
   iGameEventStateChangeInfo,
 } from '../../systems/game/types';
+import WinSymbol from '../../components/winSymbol/winSymbol';
+import { CoinsAnimation } from '../../components/particles/coins/coinsAnimation';
+import { COINS_RAIN_PARTICLES_CONFIG } from '../../components/particles/coins/configs/rainConfig';
+import waitForTickerTime from '../../utils/waitForTickerTime';
+import WinCounter from '../../components/display/winCounter/winCounter';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
   protected _winBackground!: Sprite;
   protected _symbolsFrame!: SymbolsFrame;
+  protected _coinsRain!: CoinsAnimation;
+  protected _winSymbol!: WinSymbol;
   protected _messageBox!: MessageBox;
+  protected _winCounter!: WinCounter;
   protected _playButton!: Button;
   protected _mode: eGameSceneModes;
 
@@ -78,6 +86,12 @@ export default class GameScene extends Scene {
     this.addChild(this._winBackground);
     this._winBackground.alpha = 0;
 
+    // Coin Rain
+    this._coinsRain = new CoinsAnimation(COINS_RAIN_PARTICLES_CONFIG);
+    this._coinsRain.x = GAME_CONFIG.referenceSize.width / 2;
+    this._coinsRain.y = GAME_CONFIG.referenceSize.height / 2;
+    this.addChild(this._coinsRain);
+
     // Symbols Frame
     this._symbolsFrame = new SymbolsFrame().init({
       numSymbols: initResponse.initPlay.play.symbols.length,
@@ -87,6 +101,13 @@ export default class GameScene extends Scene {
     this._symbolsFrame.x = GAME_CONFIG.referenceSize.width / 2;
     this._symbolsFrame.y = GAME_CONFIG.referenceSize.height / 2;
     this.addChild(this._symbolsFrame);
+
+    // Win Symbol
+    this._winSymbol = new WinSymbol();
+    this._winSymbol.x = GAME_CONFIG.referenceSize.width / 2;
+    this._winSymbol.y = GAME_CONFIG.referenceSize.height / 2;
+    this._winSymbol.visible = false;
+    this.addChild(this._winSymbol);
 
     // Message Box
     this._messageBox = new MessageBox({
@@ -116,6 +137,16 @@ export default class GameScene extends Scene {
 
     // Start listening events
     this._listenEvents();
+
+    this._winCounter = new WinCounter({
+      ...WIN_COUNTER_OPTIONS,
+      ...{ ticker: Game.ticker },
+    });
+    this._winCounter.alpha = 0;
+    this._winCounter.visible = false;
+    this._winCounter.x = GAME_CONFIG.referenceSize.width / 2;
+    this._winCounter.y = GAME_CONFIG.referenceSize.height / 2;
+    this.addChild(this._winCounter);
 
     return this;
   }
@@ -255,12 +286,38 @@ export default class GameScene extends Scene {
       const isBigWin = false;
       const winInfo = playResponse.play.win;
       const winSymbols = winInfo.winSymbols;
+      const winCountTime = isBigWin ? 6000 : 3000;
 
       this.modeTo(eGameSceneModes.WIN);
 
+      this._winSymbol.visible = true;
+
+      // Arrange symbols for winning animation
       await this._symbolsFrame.showWin(winSymbols, isBigWin);
 
+      // Big Win Coins Rain
+      if (isBigWin) this._coinsRain.start();
+
+      // Show and Start the Win Counter Display
+      this._winCounter.countTo(winInfo.totalWin, 0, winCountTime, 64);
+
+      // Show the win symbol animation
+      await this._winSymbol.play(
+        winInfo.winSymbol as string,
+        winCountTime / 1000
+      );
+
+      this._winCounter.hide();
       this.modeTo(eGameSceneModes.GAME);
+
+      this._winSymbol.visible = false;
+      if (isBigWin) {
+        this._coinsRain.emitter.spawn = false;
+        await waitForTickerTime(1000, Game.ticker);
+        this._coinsRain.stop();
+      }
+
+      this._messageBox.setText(GAME_MESSAGES.winState(winInfo.totalWin));
     }
   }
 
