@@ -1,5 +1,5 @@
-import { PoolItemConstructor, Rectangle } from "pixi.js";
-import { ParticleItem } from "./ParticleItem";
+import { PoolItemConstructor, Rectangle } from 'pixi.js';
+import { ParticleItem } from './ParticleItem';
 
 export type TParticleOptionRange = [number, number] | number;
 
@@ -18,6 +18,11 @@ export type TParticleOptionUpdateCallback = (
   elapsedMS: number,
   contentFrame?: Rectangle
 ) => void;
+
+export interface iParticleOptionStartEnd {
+  start: TParticleOptionRange;
+  end: TParticleOptionRange;
+}
 
 export interface iParticleVector1Physics {
   value: TParticleOptionRange;
@@ -42,22 +47,13 @@ export interface iParticleVector2Physics {
 
 export interface iParticleSpawnOptions {
   position: iParticleVector2Physics;
-  scale?: iParticleVector2Physics | TParticleOptionRange;
+  scale?:
+    | iParticleOptionStartEnd
+    | iParticleVector2Physics
+    | TParticleOptionRange;
   rotation?: iParticleVector1Physics;
-  alpha?:
-    | {
-        start: number;
-        end: number;
-      }
-    | TParticleOptionFunction;
-  color?:
-    | {
-        start: number;
-        end: number;
-      }
-    | TParticleOptionFunction
-    | number[]
-    | number;
+  alpha?: iParticleOptionStartEnd | TParticleOptionFunction;
+  color?: iParticleOptionStartEnd | TParticleOptionFunction | number[] | number;
   onInit?: TParticleOptionInitCallback;
   onUpdate?: TParticleOptionUpdateCallback;
   lifespan?: TParticleOptionRange;
@@ -87,6 +83,7 @@ export interface iParticleUpdateOptions {
 export interface iParticleEmitterOptions {
   ClassType: PoolItemConstructor<ParticleItem>;
   initialSize: number;
+  maxParticles?: number;
   spawnOptions: iParticleSpawnOptions;
   updateOptions: iParticleUpdateOptions;
   contentFrame?: Rectangle;

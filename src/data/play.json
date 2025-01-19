@@ -1,0 +1,20 @@
+{
+  "responses": [
+    {
+      "type": "play",
+      "player": {
+        "balance": 60
+      },
+      "play": {
+        "id": "6542584",
+        "symbols": ["s03", "s02", "s03"],
+        "win": {
+          "totalWin": 60,
+          "symbolWin": 30,
+          "winSymbols": ["s03", null, "s03"],
+          "winSymbol": "s03"
+        }
+      }
+    }
+  ]
+}

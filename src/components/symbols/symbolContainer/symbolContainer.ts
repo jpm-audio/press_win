@@ -56,6 +56,7 @@ export default class SymbolContainer extends Container {
 
     // Set the new symbol by its type
     this._symbol = SymbolFactory.get(symbolType);
+
     this._symbolLayer.addChild(this._symbol);
   }
 

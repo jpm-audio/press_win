@@ -1,11 +1,11 @@
-import { Color, Particle, PoolItem, Rectangle, Texture } from "pixi.js";
-import { randomListItem } from "../../utils/random";
-import { ParticleEmitter } from "./ParticleEmitter";
+import { Color, Particle, PoolItem, Rectangle, Texture } from 'pixi.js';
+import { ParticleEmitter } from './ParticleEmitter';
 import {
   TParticleOptionUpdateCallback,
   TParticleOptionFunction,
   iParticleEmitterInitData,
-} from "./types";
+} from './types';
+import { randomListItem } from '../../utils/random';
 
 export class ParticleItem extends Particle implements PoolItem {
   protected _colorHandlers: [Color, Color] = [new Color(), new Color()];
@@ -38,6 +38,8 @@ export class ParticleItem extends Particle implements PoolItem {
   public colorStart: number | null = null;
   public colorEnd: number | null = null;
   public colorGetter: TParticleOptionFunction | null = null;
+  public scaleStart: number | null = null;
+  public scaleEnd: number | null = null;
   public lifespan: number = 0;
   public currentLife: number = 0;
   public onUpdate: TParticleOptionUpdateCallback | null = null;
@@ -132,16 +134,32 @@ export class ParticleItem extends Particle implements PoolItem {
 
     // Scale
     if (spawnOptions.scale) {
+      //TParticleOptionRange?
       if (
         Array.isArray(spawnOptions.scale) ||
-        typeof spawnOptions.scale === "number"
+        typeof spawnOptions.scale === 'number'
       ) {
         const scale = ParticleEmitter.randomFromRange(spawnOptions.scale);
         this.scaleX = scale;
         this.scaleY = scale;
-      } else {
+      } else if (
+        spawnOptions.scale &&
+        'start' in spawnOptions.scale &&
+        'end' in spawnOptions.scale
+      ) {
+        this.scaleStart = ParticleEmitter.randomFromRange(
+          spawnOptions.scale.start
+        );
+        this.scaleEnd = ParticleEmitter.randomFromRange(spawnOptions.scale.end);
+      }
+      // iParticleVector2Physics?
+      else if (
+        spawnOptions.scale &&
+        'x' in spawnOptions.scale &&
+        'y' in spawnOptions.scale
+      ) {
         this.scaleX = ParticleEmitter.randomFromRange(spawnOptions.scale.x);
-        this.scaleY = ParticleEmitter.randomFromRange(spawnOptions.scale.x);
+        this.scaleY = ParticleEmitter.randomFromRange(spawnOptions.scale.y);
         if (spawnOptions.scale.velocity) {
           const scaleVelocity = ParticleEmitter.randomFromRange(
             spawnOptions.scale.velocity
@@ -216,25 +234,29 @@ export class ParticleItem extends Particle implements PoolItem {
 
     // Alpha
     if (spawnOptions.alpha) {
-      if (typeof spawnOptions.alpha === "function") {
+      if (typeof spawnOptions.alpha === 'function') {
         this.alphaGetter = spawnOptions.alpha;
       } else {
-        this.alphaStart = spawnOptions.alpha.start;
-        this.alphaEnd = spawnOptions.alpha.end;
+        this.alphaStart = ParticleEmitter.randomFromRange(
+          spawnOptions.alpha.start
+        );
+        this.alphaEnd = ParticleEmitter.randomFromRange(spawnOptions.alpha.end);
       }
     }
 
     // Color
     if (spawnOptions.color) {
-      if (typeof spawnOptions.color === "function") {
+      if (typeof spawnOptions.color === 'function') {
         this.colorGetter = spawnOptions.color;
       } else if (Array.isArray(spawnOptions.color)) {
         this.tint = randomListItem(spawnOptions.color as []);
-      } else if (typeof spawnOptions.color === "number") {
+      } else if (typeof spawnOptions.color === 'number') {
         this.tint = spawnOptions.color;
       } else if (spawnOptions.color.start && spawnOptions.color.end) {
-        this.colorStart = spawnOptions.color.start;
-        this.colorEnd = spawnOptions.color.end;
+        this.colorStart = ParticleEmitter.randomFromRange(
+          spawnOptions.color.start
+        );
+        this.colorEnd = ParticleEmitter.randomFromRange(spawnOptions.color.end);
       }
     }
 
@@ -269,6 +291,11 @@ export class ParticleItem extends Particle implements PoolItem {
    */
   public update(elapsedMS: number, contentFrame?: Rectangle) {
     const elapsedSec = elapsedMS / 1000;
+
+    // Lifespan
+    this.currentLife += elapsedSec;
+    const lifePercent = Math.min(this.currentLife / this.lifespan, 1);
+
     // Update Position
     this.x += this.velocityX * elapsedSec;
     this.y += this.velocityY * elapsedSec;
@@ -276,18 +303,21 @@ export class ParticleItem extends Particle implements PoolItem {
     this.velocityY += this.accelerationY * elapsedSec;
 
     // Update Scale
-    this.scaleX += this.scaleVelocityX * elapsedSec;
-    this.scaleY += this.scaleVelocityY * elapsedSec;
-    this.scaleVelocityX += this.scaleAccelerationX * elapsedSec;
-    this.scaleVelocityY += this.scaleAccelerationY * elapsedSec;
+    if (this.scaleStart !== null && this.scaleEnd !== null) {
+      this.scaleX =
+        this.scaleStart + (this.scaleEnd - this.scaleStart) * lifePercent;
+      this.scaleY =
+        this.scaleStart + (this.scaleEnd - this.scaleStart) * lifePercent;
+    } else {
+      this.scaleX += this.scaleVelocityX * elapsedSec;
+      this.scaleY += this.scaleVelocityY * elapsedSec;
+      this.scaleVelocityX += this.scaleAccelerationX * elapsedSec;
+      this.scaleVelocityY += this.scaleAccelerationY * elapsedSec;
+    }
 
     // Update Rotation
     this.rotation += this.rotationVelocity * elapsedSec;
     this.rotationVelocity += this.rotationAcceleration * elapsedSec;
-
-    // Lifespan
-    this.currentLife += elapsedSec;
-    const lifePercent = Math.min(this.currentLife / this.lifespan, 1);
 
     // Update Alpha
     if (this.alphaGetter) {
@@ -387,6 +417,8 @@ export class ParticleItem extends Particle implements PoolItem {
     this.colorStart = null;
     this.colorEnd = null;
     this.colorGetter = null;
+    this.scaleStart = null;
+    this.scaleEnd = null;
     this.lifespan = Infinity;
     this.currentLife = 0;
   }

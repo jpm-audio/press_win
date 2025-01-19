@@ -1,61 +1,57 @@
 import waitForTime from '../utils/waitForTime';
-import { iServerInitResponse, TResponseType, TSymbolId } from './types';
+import { iServerInitResponse, iServerPlayResponse } from './types';
+import initResponses from '../data/init.json';
+import playResponses from '../data/play.json';
 
+/**
+ * Fake Game Server
+ *
+ * It is a fake server that returns random responses from the data files.
+ * It is used to simulate a real server connexion and responses with a random delay configured.
+ */
 export default class GameServer {
-  constructor() {}
+  protected _responseDelayRange: [number, number] = [1000, 2000];
+  public initResponse: iServerInitResponse;
+  public playResponses: iServerPlayResponse[];
+  public playResponseIndex: number = 0;
 
-  public async init(): Promise<iServerInitResponse> {
-    await waitForTime(1000);
+  public getNextPlayIndex() {
+    const index = this.playResponseIndex++;
 
-    return {
-      type: 'init',
-      player: {
-        balance: 0,
-      },
-      play: {
-        id: '6542584',
-        symbols: ['s05', 's02', 's09'],
-        win: {
-          totalWin: 0,
-          symbolWin: 0,
-          winSymbols: [null, null, null],
-        },
-      },
-      definition: {
-        symbols: [
-          's00',
-          's01',
-          's02',
-          's03',
-          's04',
-          's05',
-          's06',
-          's07',
-          's08',
-          's09',
-          's10',
-        ],
-      },
-    };
+    if (index >= this.playResponses.length) {
+      this.playResponseIndex = 0;
+    }
+
+    return index;
   }
 
-  public async play() {
-    await waitForTime(1500);
+  constructor() {
+    this.initResponse = initResponses.responses[
+      Math.floor(Math.random() * initResponses.responses.length)
+    ] as iServerInitResponse;
+    this.playResponses = playResponses.responses as iServerPlayResponse[];
 
-    return {
-      type: 'play' as TResponseType,
-      player: {
-        balance: 60,
-      },
-      play: {
-        id: '6542584',
-        symbols: ['s03', 's02', 's03'] as TSymbolId[],
-        win: {
-          totalWin: 60,
-          symbolWin: 30,
-          winSymbols: ['s03', null, 's03'] as TSymbolId[],
-        },
-      },
-    };
+    // Set first play response as the init play response
+    this.initResponse.initPlay = this.playResponses[0];
+    this.playResponseIndex = this.getNextPlayIndex();
+  }
+
+  protected _getRandomDelay() {
+    return this._responseDelayRange[
+      Math.floor(Math.random() * this._responseDelayRange.length)
+    ];
+  }
+
+  public async init(): Promise<iServerInitResponse> {
+    await waitForTime(this._getRandomDelay());
+    return this.initResponse;
+  }
+
+  public async play(): Promise<iServerPlayResponse> {
+    await waitForTime(this._getRandomDelay());
+    const playResponse = this.playResponses[this.playResponseIndex];
+    this.playResponseIndex = this.getNextPlayIndex();
+
+    return playResponse;
   }
 }

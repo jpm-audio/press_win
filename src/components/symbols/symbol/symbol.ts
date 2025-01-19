@@ -59,6 +59,7 @@ export default class Symbol extends Container {
    */
   public init() {
     this._floatingLayer.scale.set(0);
+    this._floatingLayer.alpha = 1;
     this._shine.alpha = 0;
     this._shine.scale.set(0);
   }

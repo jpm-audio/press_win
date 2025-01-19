@@ -9,6 +9,10 @@ export class BubblesAnimation extends Container {
     return this._emitter.ticker;
   }
 
+  public get isPlaying() {
+    return this._emitter.isRunning;
+  }
+
   constructor() {
     super();
 

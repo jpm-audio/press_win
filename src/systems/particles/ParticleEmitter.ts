@@ -39,6 +39,9 @@ export class ParticleEmitter extends ParticleContainer {
   protected _spawnInterval: number = 0;
   protected _spawnVelocity: number = 0;
   protected _spawnDurationElapsed: number = 0;
+  protected _maxParticles: number = 100;
+  protected _isRunning: boolean = false;
+  protected _isPaused: boolean = false;
 
   public spawnDuration: number = 0;
   public spawn: boolean = false;
@@ -83,6 +86,18 @@ export class ParticleEmitter extends ParticleContainer {
     this._environment.affectSurface = value;
   }
 
+  public get isRunning() {
+    return this._isRunning;
+  }
+
+  public get isPaused() {
+    return this._isPaused;
+  }
+
+  public get isEmitting() {
+    return this.spawn;
+  }
+
   /**
    *
    * @param options
@@ -98,6 +113,11 @@ export class ParticleEmitter extends ParticleContainer {
 
     // Create Pool
     this._pool = new Pool(options.ClassType, options.initialSize);
+
+    // Max Particles
+    if (options.maxParticles !== undefined) {
+      this._maxParticles = options.maxParticles;
+    }
 
     // Create Ticker
     this._ticker = new Ticker();
@@ -152,19 +172,23 @@ export class ParticleEmitter extends ParticleContainer {
    * @returns
    */
   protected _spawn(elapsedMS: number) {
+    // Check if spawn is disabled
     if (!this.spawn || !this._spawnInterval) return;
 
-    this._spawnElapsed += elapsedMS;
+    // Check if max particles reached
+    if (this.particleChildren.length >= this._maxParticles) return;
 
+    // Check if spawn interval reached
+    this._spawnElapsed += elapsedMS;
     if (this._spawnElapsed < this._spawnInterval) return;
 
+    // Spawn particles!
     const numSpawns = Math.floor(this._spawnElapsed / this._spawnInterval);
-
     for (let i = 0; i < numSpawns; i++) {
-      // Spawn Particle
       this._spawnParticle();
     }
 
+    // Reset the spawn elapsed time
     this._spawnElapsed = 0;
     this._spawnInterval =
       1000 /
@@ -342,16 +366,19 @@ export class ParticleEmitter extends ParticleContainer {
    * @returns
    */
   public start(emit: boolean = false) {
-    if (this._ticker.started) return;
+    if (this._isRunning) return;
     this.spawn = emit;
     this._spawnElapsed = this._spawnInterval;
     this._ticker.start();
+    this._isRunning = true;
   }
 
   /**
    *
    */
   public pause() {
+    if (!this._isRunning || this._isPaused) return;
+    this._isPaused = true;
     this._ticker.stop();
   }
 
@@ -359,6 +386,8 @@ export class ParticleEmitter extends ParticleContainer {
    *
    */
   public resume() {
+    if (!this._isRunning || !this._isPaused) return;
+    this._isPaused = false;
     this._ticker.start();
   }
 
@@ -366,6 +395,7 @@ export class ParticleEmitter extends ParticleContainer {
    *
    */
   public stop() {
+    if (!this._isRunning) return;
     this.reset();
     this._ticker.stop();
   }
@@ -374,6 +404,8 @@ export class ParticleEmitter extends ParticleContainer {
    *
    */
   public reset() {
+    this._isRunning = false;
+    this._isPaused = false;
     this.spawn = false;
     this._updateElapsed = 0;
     this._spawnElapsed = 0;

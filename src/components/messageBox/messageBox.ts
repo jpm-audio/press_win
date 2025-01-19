@@ -12,8 +12,6 @@ export default class MessageBox extends Container {
     super();
     this.options = options;
 
-    console.log(this.options.textOptions);
-
     this._text = new LocaleText(this.options.textOptions);
     this._text.anchor.set(0.5);
     this.addChild(this._text);

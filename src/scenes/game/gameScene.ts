@@ -1,4 +1,4 @@
-import { Color, Sprite, TextStyleOptions } from 'pixi.js';
+import { Color, DestroyOptions, Sprite, TextStyleOptions } from 'pixi.js';
 import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
@@ -13,7 +13,13 @@ import ButtonFactory from '../../components/buttons/buttonFactory';
 import Button from '../../components/buttons/button';
 import DefaultButtonBuilder from '../../components/buttons/defaultButton/defaultButtonBulder';
 import { PLAY_BUTTON_CONFIG } from '../../components/buttons/defaultButton/config';
-import { eGameEvents } from '../../systems/game/types';
+import {
+  eGameActionEvents,
+  eGameEvents,
+  eGameStates,
+  iGameEventErrorInfo,
+  iGameEventStateChangeInfo,
+} from '../../systems/game/types';
 
 export default class GameScene extends Scene {
   protected _background!: Sprite;
@@ -28,6 +34,33 @@ export default class GameScene extends Scene {
     this._mode = eGameSceneModes.GAME;
   }
 
+  protected _listenEvents() {
+    Game.bus.on(eGameEvents.STATE_CHANGE, this.onGameStateChange, this);
+    Game.bus.on(eGameEvents.ERROR, this.onGameError, this);
+    this._symbolsFrame.on(
+      eSymbolsFrameEvents.ALL_SYMBOLS_REVEALED,
+      this.onFrameSymbolsRevealed,
+      this
+    );
+  }
+
+  protected _unlistenEvents() {
+    Game.bus.off(eGameEvents.STATE_CHANGE, this.onGameStateChange, this);
+    Game.bus.off(eGameEvents.ERROR, this.onGameError, this);
+    this._symbolsFrame.off(
+      eSymbolsFrameEvents.ALL_SYMBOLS_REVEALED,
+      this.onFrameSymbolsRevealed,
+      this
+    );
+  }
+
+  /**
+   * Initializes the game scene.
+   * It creates the background, the symbols frame, the message box and the play button.
+   *
+   * @param initResponse
+   * @returns
+   */
   public init(initResponse: iServerInitResponse) {
     this._id = 'Game Scene';
     // Background
@@ -47,17 +80,12 @@ export default class GameScene extends Scene {
 
     // Symbols Frame
     this._symbolsFrame = new SymbolsFrame().init({
-      numSymbols: initResponse.play.symbols.length,
+      numSymbols: initResponse.initPlay.play.symbols.length,
       symbolTypes: initResponse.definition.symbols,
-      initialState: initResponse.play.symbols,
+      initialState: initResponse.initPlay.play.symbols,
     });
     this._symbolsFrame.x = GAME_CONFIG.referenceSize.width / 2;
     this._symbolsFrame.y = GAME_CONFIG.referenceSize.height / 2;
-    this._symbolsFrame.on(
-      eSymbolsFrameEvents.ALL_SYMBOLS_REVEALED,
-      this.onAllSymbolsRevealed,
-      this
-    );
     this.addChild(this._symbolsFrame);
 
     // Message Box
@@ -87,19 +115,23 @@ export default class GameScene extends Scene {
     this._playButton.disable();
     this._playButton.visible = false;
     this._playButton.on('pointerup', () =>
-      Game.bus.emit(eGameEvents.PLAY_ACTION)
+      Game.bus.emit(eGameActionEvents.PLAY_ACTION)
     );
     this.addChild(this._playButton);
+
+    // Start listening events
+    this._listenEvents();
 
     return this;
   }
 
-  public async start() {
-    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.initialState());
-    this._messageBox.show();
-    await this._symbolsFrame.start();
-  }
-
+  /**
+   * It handles the visual mode change of the game scene, for normal game mode
+   * and win mode, that is win celebration animations.
+   *
+   * @param mode
+   * @param duration
+   */
   public async modeTo(mode: eGameSceneModes, duration: number = 0.5) {
     if (this._mode !== mode) {
       // Change Background
@@ -123,27 +155,117 @@ export default class GameScene extends Scene {
     }
   }
 
-  public onAllSymbolsRevealed() {
-    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.winState());
+  /**
+   * Listener callback called when the GAME_ERROR event is emitted.
+   * It is meant to handle actions when the game state changes.
+   *
+   * @param event
+   */
+  public onGameError(_event: iGameEventErrorInfo) {
+    // TODO - Actions on error
+  }
+
+  /**
+   * Listener callback called when the ALL_SYMBOLS_REVEALED event is emitted
+   * from the symbols frame.
+   * Then it emits the SYMBOLS_REVEALED game action event to notify the game controller
+   * as a player action of reaveling all symbols.
+   */
+  public onFrameSymbolsRevealed() {
+    Game.bus.emit(eGameActionEvents.SYMBOLS_REVEALED);
+  }
+
+  /**
+   * Listener callback called when the GAME_STATE_CHANGE event is emitted.
+   * It is meant to handle actions when the game state changes.
+   *
+   * @param state
+   */
+  public onGameStateChange(event: iGameEventStateChangeInfo) {
+    if (event.state === eGameStates.READY) {
+      this.onReadyGameState();
+      return;
+    }
+
+    if (event.state === eGameStates.REVEALED) {
+      this.onRevealedGameState();
+      return;
+    }
+  }
+
+  /**
+   * Starts the game scene.
+   * It shows the message box and starts the symbols frame animations.
+   */
+  public async onReadyGameState() {
+    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.initialState());
+    this._messageBox.show();
+  }
+
+  /**
+   * Listener callback called when the REVEALED game state is Reached
+   */
+  public async onRevealedGameState() {
+    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.playState());
     this._playButton.enable();
     this._playButton.visible = true;
   }
 
-  public startPlay() {
+  /**
+   * To call from Game Controller when a new play request starts,
+   * it will hide the play button, and Set the symbols frame properly in "playing" state.
+   */
+  public async startPlay() {
     // Hide play button
     this._playButton.disable();
     this._playButton.visible = false;
 
+    // Set the message box properly
+    const messagePromise = this._messageBox.setText(
+      MESSAGE_BOX_CONFIG.messages.playState()
+    );
+
     // Start Play State on the screen
-    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.playState());
-    this._symbolsFrame.startPlay();
+    const symbolsPromise = this._symbolsFrame.startPlay();
+
+    await Promise.all([messagePromise, symbolsPromise]);
   }
 
-  public stopPlay(playResponse: iServerPlayResponse) {
+  /**
+   * To call from Game Controller when a new play request is finished,
+   * it will prepare the scene for a ready state for play start revealing symbols.
+   *
+   * @param playResponse
+   */
+  public async setPlay(playResponse: iServerPlayResponse) {
     // Hide the message box
     this._messageBox.hide();
 
     // Clear the screen and show the new boxes
-    this._symbolsFrame.stopPlay(playResponse);
+    await this._symbolsFrame.initSymbols(playResponse);
+  }
+
+  /**
+   * To call from Game Controller when all symbols are revealed,
+   * and game is ready for showing the results and celebrate the win!
+   *
+   * @param playResponse
+   */
+  public async showResults(playResponse: iServerPlayResponse) {
+    // Hide the message box
+    this._messageBox.hide();
+
+    // Clear the screen and show the new boxes
+    await this._symbolsFrame.showResults(playResponse);
+  }
+
+  /**
+   * Function override to remove the events listeners when the scene is destroyed.
+   *
+   * @param options
+   */
+  public destroy(options?: DestroyOptions): void {
+    this._unlistenEvents();
+    super.destroy(options);
   }
 }

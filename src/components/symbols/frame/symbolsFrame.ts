@@ -14,6 +14,11 @@ import { iServerPlayResponse } from '../../../api/types';
 import { BubblesAnimation } from '../../particles/bubbles/bubblesAnimation';
 import gsap from 'gsap';
 
+/**
+ * Symbols Frame
+ *
+ * Component that manages the symbols containers and their behaviors and states.
+ */
 export default class SymbolsFrame extends Container {
   protected _symbolsContainer: SymbolContainer[] = [];
   protected _bubblesParticles: BubblesAnimation[] = [];
@@ -21,6 +26,9 @@ export default class SymbolsFrame extends Container {
   protected _bubblesLayer: Container;
   protected _config = SYMBOLS_FRAME_CONFIG;
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
 
@@ -31,6 +39,13 @@ export default class SymbolsFrame extends Container {
     this.addChild(this._bubblesLayer);
   }
 
+  /**
+   * Initializes the symbols frame.
+   * It creates the symbol containers and the bubbles particles and set their initial state.
+   *
+   * @param options
+   * @returns
+   */
   public init(options: iSymbolsFrameOptions) {
     const numSymbols = options.numSymbols;
     const xDistance = GAME_CONFIG.referenceSize.width / (numSymbols + 1);
@@ -67,6 +82,15 @@ export default class SymbolsFrame extends Container {
     return this;
   }
 
+  /**
+   * Listener callback called when the state of a symbol container changes,
+   * that is after a player press a symbol and the revelation animation is finished.
+   *
+   * It is meant to handle the revealed symbols count, when all symbols are revealed,
+   * it emits the ALL_SYMBOLS_REVEALED event, to notofy the to the Game controller of this state.
+   *
+   * @param state
+   */
   public onSymbolStateChanged(state: eSymbolContainerStates) {
     if (state === eSymbolContainerStates.REVEALED) {
       let revealed = 0;
@@ -81,6 +105,12 @@ export default class SymbolsFrame extends Container {
     }
   }
 
+  /**
+   * Starts the animation of the symbols containers to be shown
+   * on the screen (falls down) with "hidden" state.
+   *
+   * @returns
+   */
   public async start() {
     let lastPromise;
     for (let i = 0; i < this._symbolsContainer.length; i++) {
@@ -90,23 +120,61 @@ export default class SymbolsFrame extends Container {
     await lastPromise;
   }
 
+  /**
+   * To call when a new play request is started, it will transform the symbols into bubbles.
+   */
   public async startPlay() {
     let lastPromise;
     for (let i = 0; i < this._symbolsContainer.length; i++) {
       if (i !== 0) await waitForTickerTime(150, Game.ticker);
-      lastPromise = this.transformSymbolsIntoBubbles(i);
+      lastPromise = this.transformSymbolIntoBubbles(i);
     }
     await lastPromise;
   }
 
-  public async transformSymbolsIntoBubbles(index: number) {
+  /**
+   *  Handler to tranform a symbol into a bubble.
+   *
+   * @param index
+   */
+  public async transformSymbolIntoBubbles(index: number) {
     this._symbolsContainer[index].hide();
     await waitForTickerTime(400, Game.ticker);
     this._bubblesParticles[index].start();
   }
 
+  /**
+   * To call when a new play request is finished, it will remove the bubbles particles
+   * will set the symbols back to their initial state showing them again
+   * in the "hidden" state (falling down).
+   *
+   * @param playResponse
+   */
+  public async initSymbols(playResponse: iServerPlayResponse) {
+    let lastPromise;
+    for (let i = 0; i < this._bubblesParticles.length; i++) {
+      lastPromise = this.removeBubblesParticles(i);
+    }
+
+    await lastPromise;
+
+    playResponse.play.symbols.forEach((symbolId, index) => {
+      this._symbolsContainer[index].setSymbol(symbolId);
+    });
+
+    await this.start();
+  }
+
+  /**
+   * Handler to remove the bubbles particles from the screen,
+   * by addingwind "blowing" effect and fading them out.
+   *
+   * @param index
+   */
   public async removeBubblesParticles(index: number) {
     const bubbles = this._bubblesParticles[index];
+    if (!bubbles.isPlaying) return;
+
     bubbles.setWind({ x: 1000, y: 0 });
     await waitForTickerTime(1000, Game.ticker);
     await gsap.to(bubbles, {
@@ -120,18 +188,9 @@ export default class SymbolsFrame extends Container {
     bubbles.alpha = 1;
   }
 
-  public async stopPlay(playResponse: iServerPlayResponse) {
-    let lastPromise;
-    for (let i = 0; i < this._bubblesParticles.length; i++) {
-      lastPromise = this.removeBubblesParticles(i);
-    }
+  public async showResults(_playResponse: iServerPlayResponse) {
+    // TODO - Show Results animations if win
 
-    await lastPromise;
-
-    playResponse.play.symbols.forEach((symbolId, index) => {
-      this._symbolsContainer[index].setSymbol(symbolId);
-    });
-
-    await this.start();
+    console.log('show results');
   }
 }

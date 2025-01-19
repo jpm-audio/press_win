@@ -28,18 +28,19 @@ export interface iPlayInfo {
     totalWin: number;
     symbolWin: number;
     winSymbols: (TSymbolId | null)[];
+    winSymbol: TSymbolId | null;
   };
-}
-
-export interface iServerInitResponse {
-  type: TResponseType;
-  player: iPlayerInfo;
-  play: iPlayInfo;
-  definition: iGameDefinition;
 }
 
 export interface iServerPlayResponse {
   type: TResponseType;
   player: iPlayerInfo;
   play: iPlayInfo;
+}
+
+export interface iServerInitResponse {
+  type: TResponseType;
+  player: iPlayerInfo;
+  definition: iGameDefinition;
+  initPlay: iServerPlayResponse;
 }

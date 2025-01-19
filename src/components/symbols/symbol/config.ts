@@ -1,7 +1,8 @@
 export const SYMBOL_SHOW_ANIMATION_OPTIONS = {
   duration: 0.5,
   pixi: {
-    scale: 1,
+    scaleX: 1,
+    scaleY: 1,
   },
   ease: 'back.out(1.7)',
 };
@@ -9,7 +10,8 @@ export const SYMBOL_SHOW_ANIMATION_OPTIONS = {
 export const SYMBOL_HIDE_ANIMATION_OPTIONS = {
   duration: 0.5,
   pixi: {
-    scale: 2,
+    scaleX: 2,
+    scaleY: 2,
     alpha: 0,
   },
   ease: 'elastic.in(1,0.5)',
