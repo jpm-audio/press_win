@@ -10,7 +10,11 @@ import {
 } from '../../systems/game/config';
 import { iServerInitResponse, iServerPlayResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
-import { GAME_MESSAGES, MESSAGE_BOX_CONFIG } from './config';
+import {
+  GAME_MESSAGES,
+  MESSAGE_BOX_CONFIG,
+  WIN_ANIMATION_CONFIG,
+} from './config';
 import Game from '../../systems/game/game';
 import { eSymbolsFrameEvents } from '../../components/symbols/frame/types';
 import ButtonFactory from '../../components/buttons/buttonFactory';
@@ -31,8 +35,7 @@ import waitForTickerTime from '../../utils/waitForTickerTime';
 import WinCounter from '../../components/display/winCounter/winCounter';
 
 export default class GameScene extends Scene {
-  protected _background!: Sprite;
-  protected _winBackground!: Sprite;
+  protected _backgrounds: Map<eGameSceneModes, Sprite> = new Map();
   protected _symbolsFrame!: SymbolsFrame;
   protected _coinsRain!: CoinsAnimation;
   protected _winSymbol!: WinSymbol;
@@ -76,19 +79,30 @@ export default class GameScene extends Scene {
   public init(initResponse: iServerInitResponse) {
     this._id = 'Game Scene';
     // Background
-    this._background = this._getBackground([
+    const background = this._getBackground([
       { color: new Color(0x00fefe), stop: 0 },
       { color: new Color(0x000000), stop: 1 },
     ]);
-    this.addChild(this._background);
+    this.addChild(background);
+    this._backgrounds.set(eGameSceneModes.GAME, background);
 
     // Win Background
-    this._winBackground = this._getBackground([
+    const winBackground = this._getBackground([
       { color: new Color(0xfe00fe), stop: 0 },
       { color: new Color(0x000000), stop: 1 },
     ]);
-    this.addChild(this._winBackground);
-    this._winBackground.alpha = 0;
+    this.addChild(winBackground);
+    this._backgrounds.set(eGameSceneModes.WIN, winBackground);
+    winBackground.alpha = 0;
+
+    // Win Background
+    const bigWinBackground = this._getBackground([
+      { color: new Color(0xffbf00), stop: 0 },
+      { color: new Color(0x000000), stop: 1 },
+    ]);
+    this.addChild(bigWinBackground);
+    this._backgrounds.set(eGameSceneModes.BIG_WIN, bigWinBackground);
+    bigWinBackground.alpha = 0;
 
     // Coin Rain
     this._coinsRain = new CoinsAnimation(COINS_RAIN_PARTICLES_CONFIG);
@@ -165,12 +179,14 @@ export default class GameScene extends Scene {
   public async modeTo(mode: eGameSceneModes, duration: number = 0.5) {
     if (this._mode !== mode) {
       // Change Background
-      const currentBackground =
-        this._mode === eGameSceneModes.GAME
-          ? this._background
-          : this._winBackground;
-      const nextBackground =
-        mode === eGameSceneModes.GAME ? this._background : this._winBackground;
+      let currentBackground = this._backgrounds.get(
+        eGameSceneModes.GAME
+      ) as Sprite;
+      const nextBackground = this._backgrounds.get(mode) as Sprite;
+
+      this._backgrounds.forEach((background) => {
+        if (background.alpha === 1) currentBackground = background;
+      });
 
       this._mode = mode;
 
@@ -278,32 +294,34 @@ export default class GameScene extends Scene {
     // Hide the message box
     this._messageBox.hide();
 
-    console.log('show results', playResponse);
-
     // Check whether there is a win
     if (playResponse.play.win) {
-      const isBigWin = false;
       const winInfo = playResponse.play.win;
+      const winAnimationConfig = WIN_ANIMATION_CONFIG(winInfo.totalWin);
       const winSymbols = winInfo.winSymbols;
-      const winCountTime = isBigWin ? 6000 : 3000;
 
-      this.modeTo(eGameSceneModes.WIN);
+      this.modeTo(winAnimationConfig.gameMode);
 
       this._winSymbol.visible = true;
 
       // Arrange symbols for winning animation
-      await this._symbolsFrame.showWin(winSymbols, isBigWin);
+      await this._symbolsFrame.showWin(winSymbols);
 
       // Big Win Coins Rain
-      if (isBigWin) this._coinsRain.start();
+      if (winAnimationConfig.isBigWin) this._coinsRain.start();
 
       // Show and Start the Win Counter Display
-      this._winCounter.countTo(winInfo.totalWin, 0, winCountTime, 64);
+      this._winCounter.countTo(
+        winInfo.totalWin,
+        0,
+        winAnimationConfig.winCountTime,
+        64
+      );
 
       // Show the win symbol animation
       await this._winSymbol.play(
         winInfo.winSymbol as string,
-        winCountTime / 1000
+        winAnimationConfig.winCountTime / 1000
       );
 
       this._winCounter.hide();
@@ -313,7 +331,7 @@ export default class GameScene extends Scene {
       const modePromise = this.modeTo(eGameSceneModes.GAME);
 
       this._winSymbol.visible = false;
-      if (isBigWin) {
+      if (winAnimationConfig.isBigWin) {
         this._coinsRain.emitter.spawn = false;
         await waitForTickerTime(1000, Game.ticker);
         this._coinsRain.stop();

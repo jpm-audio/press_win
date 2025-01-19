@@ -206,48 +206,37 @@ export default class SymbolsFrame extends Container {
    *
    * @param playResponse
    */
-  public async showWin(
-    winResultSymbols: (TSymbolId | null)[],
-    isBigWin: boolean
-  ) {
-    // Show Big Win
-    if (isBigWin) {
-      //this.emit(eSymbolsFrameEvents.BIG_WIN);
-    }
+  public async showWin(winResultSymbols: (TSymbolId | null)[]) {
+    // Get non-win symbols and win symbols
+    const nonWinSymbols = [];
+    const winSymbols = [];
+    let lastPromise;
 
-    // Show Win
-    else {
-      // Get non-win symbols and win symbols
-      const nonWinSymbols = [];
-      const winSymbols = [];
-      let lastPromise;
-
-      for (let i = 0; i < winResultSymbols.length; i++) {
-        if (winResultSymbols[i] === null) {
-          nonWinSymbols.push(this._symbolsContainer[i]);
-        } else {
-          winSymbols.push(this._symbolsContainer[i]);
-        }
+    for (let i = 0; i < winResultSymbols.length; i++) {
+      if (winResultSymbols[i] === null) {
+        nonWinSymbols.push(this._symbolsContainer[i]);
+      } else {
+        winSymbols.push(this._symbolsContainer[i]);
       }
-
-      // Non-win Symbols Fades away
-      nonWinSymbols.forEach((symbolContainer) => {
-        lastPromise = this._symbolDisolveAnimation(symbolContainer);
-      });
-
-      await lastPromise;
-
-      // Win Symbols Fly to join at the center
-      const centerPosition = {
-        x: GAME_CONFIG.referenceSize.width / 2,
-        y: 0,
-      };
-      winSymbols.forEach((symbolContainer) => {
-        lastPromise = symbolContainer.symbolCollision(centerPosition);
-      });
-
-      await lastPromise;
     }
+
+    // Non-win Symbols Fades away
+    nonWinSymbols.forEach((symbolContainer) => {
+      lastPromise = this._symbolDisolveAnimation(symbolContainer);
+    });
+
+    await lastPromise;
+
+    // Win Symbols Fly to join at the center
+    const centerPosition = {
+      x: GAME_CONFIG.referenceSize.width / 2,
+      y: 0,
+    };
+    winSymbols.forEach((symbolContainer) => {
+      lastPromise = symbolContainer.symbolCollision(centerPosition);
+    });
+
+    await lastPromise;
   }
 
   /**

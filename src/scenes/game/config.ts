@@ -1,5 +1,17 @@
 import { iMessageBoxOptions } from '../../components/messageBox/types';
 import { GAME_CONFIG } from '../../systems/game/config';
+import { eGameSceneModes } from './types';
+
+const BIG_WIN_TRESHOLD = 1000;
+
+export const WIN_ANIMATION_CONFIG = (winAmount: number) => {
+  const isBigWin = winAmount >= BIG_WIN_TRESHOLD;
+  return {
+    isBigWin,
+    winCountTime: isBigWin ? 6000 : 3000,
+    gameMode: isBigWin ? eGameSceneModes.BIG_WIN : eGameSceneModes.WIN,
+  };
+};
 
 export const MESSAGE_BOX_CONFIG: iMessageBoxOptions = {
   showAnimationVars: {

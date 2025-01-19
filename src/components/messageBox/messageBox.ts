@@ -34,7 +34,6 @@ export default class MessageBox extends FadeContainer {
   }
 
   public async setText(text: string) {
-    console.error('setText', text);
     await this.hide();
     this._text.localeId = text;
     await this.show();

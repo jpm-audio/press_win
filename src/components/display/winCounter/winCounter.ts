@@ -69,8 +69,6 @@ export default class WinCounter extends FadeContainer {
     this._ticker.add(this._countTick, this);
 
     await waitForCondition(() => this._currentCount !== null);
-
-    console.log('Listo!');
   }
 
   public destroy(options?: DestroyOptions): void {
