@@ -196,7 +196,6 @@ export default class Environment extends EventEmitter {
   ) {
     super();
 
-    //window.environment = this;
     this._integration = integration;
     this._settings = settings;
 

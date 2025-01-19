@@ -1,6 +1,7 @@
 import { LocaleText } from '../text/localeText';
 import { iMessageBoxOptions } from './types';
 import FadeContainer from '../fadeContainer/fadeContainer';
+import { Locale } from '../../systems/locale/locale';
 
 export default class MessageBox extends FadeContainer {
   protected _text: LocaleText;
@@ -33,9 +34,19 @@ export default class MessageBox extends FadeContainer {
   }
 
   public async setText(text: string) {
-    const isShown = this.alpha === 1;
-    if (isShown) await this.hide();
+    console.error('setText', text);
+    await this.hide();
     this._text.localeId = text;
-    if (isShown) await this.show();
+    await this.show();
+  }
+
+  public async setTextWidthValue(
+    text: string,
+    value?: { [key: string]: string }
+  ) {
+    await this.hide();
+    const localeText = Locale.t(text, value);
+    this._text.localeId = localeText as string;
+    await this.show();
   }
 }

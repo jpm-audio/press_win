@@ -1,3 +1,4 @@
+import { TDisplayValueParser } from '../../components/display/display/types';
 import { iWinCounterOptions } from '../../components/display/winCounter/types';
 import { amountToString } from '../../utils/amountToString';
 import { iGameConfig } from './types';
@@ -59,9 +60,11 @@ export const GAME_CONFIG: iGameConfig = {
   },
 };
 
+export const VALUE_PARSER = (value: number) => amountToString(value, 2);
+
 export const WIN_COUNTER_OPTIONS: iWinCounterOptions = {
   ticker: new Ticker(),
-  valueParser: (value) => amountToString(value as number, 2),
+  valueParser: VALUE_PARSER as TDisplayValueParser,
   content: new BitmapText({
     text: '',
     style: {

@@ -6,14 +6,41 @@
         "balance": 60
       },
       "play": {
-        "id": "6542584",
+        "id": "6542586",
+        "symbols": ["s07", "s07", "s10"],
+        "win": {
+          "totalWin": 4100,
+          "symbolWin": 700,
+          "winSymbols": ["s07", "s07", "s10"],
+          "winSymbol": "s07"
+        }
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 600
+      },
+      "play": {
+        "id": "6542585",
         "symbols": ["s03", "s02", "s03"],
         "win": {
-          "totalWin": 60,
-          "symbolWin": 30,
+          "totalWin": 600,
+          "symbolWin": 300,
           "winSymbols": ["s03", null, "s03"],
           "winSymbol": "s03"
         }
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 600
+      },
+      "play": {
+        "id": "6542584",
+        "symbols": ["s08", "s06", "s04"],
+        "win": null
       }
     }
   ]

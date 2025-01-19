@@ -3,7 +3,11 @@ import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
 import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
-import { GAME_CONFIG, WIN_COUNTER_OPTIONS } from '../../systems/game/config';
+import {
+  GAME_CONFIG,
+  VALUE_PARSER,
+  WIN_COUNTER_OPTIONS,
+} from '../../systems/game/config';
 import { iServerInitResponse, iServerPlayResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
 import { GAME_MESSAGES, MESSAGE_BOX_CONFIG } from './config';
@@ -225,14 +229,12 @@ export default class GameScene extends Scene {
    */
   public async onReadyGameState() {
     this._messageBox.setText(GAME_MESSAGES.initialState());
-    this._messageBox.show();
   }
 
   /**
    * Listener callback called when the REVEALED game state is Reached
    */
   public async onRevealedGameState() {
-    this._messageBox.setText(GAME_MESSAGES.playState());
     this._playButton.enable();
     this._playButton.visible = true;
   }
@@ -262,9 +264,6 @@ export default class GameScene extends Scene {
    * @param playResponse
    */
   public async setPlay(playResponse: iServerPlayResponse) {
-    // Hide the message box
-    this._messageBox.hide();
-
     // Clear the screen and show the new boxes
     await this._symbolsFrame.initSymbols(playResponse);
   }
@@ -308,7 +307,10 @@ export default class GameScene extends Scene {
       );
 
       this._winCounter.hide();
-      this.modeTo(eGameSceneModes.GAME);
+      this._messageBox.setTextWidthValue(GAME_MESSAGES.winState(), {
+        prizeAmount: VALUE_PARSER(winInfo.totalWin),
+      });
+      const modePromise = this.modeTo(eGameSceneModes.GAME);
 
       this._winSymbol.visible = false;
       if (isBigWin) {
@@ -317,7 +319,7 @@ export default class GameScene extends Scene {
         this._coinsRain.stop();
       }
 
-      this._messageBox.setText(GAME_MESSAGES.winState(winInfo.totalWin));
+      await modePromise;
     }
   }
 

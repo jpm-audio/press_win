@@ -35,8 +35,6 @@ import { Locale } from './systems/locale/locale';
   // Init Game
   await Game.init(app, environment);
 
-  window.Game = Game;
-
   // Remove Splash Screen
   const elSplashScreen = document.getElementById('splash_screen');
   await gsap.to(elSplashScreen, {
@@ -45,6 +43,4 @@ import { Locale } from './systems/locale/locale';
     ease: 'power1.inOut',
   });
   elSplashScreen?.parentNode?.removeChild(elSplashScreen);
-
-  //window.Game = Game;
 })();

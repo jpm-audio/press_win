@@ -143,9 +143,13 @@ export default class SymbolsFrame extends Container {
    * @param index
    */
   public async transformSymbolIntoBubbles(index: number) {
-    this._symbolsContainer[index].symbolExplode();
-    await waitForTickerTime(400, Game.ticker);
-    this._bubblesParticles[index].start();
+    if (
+      this._symbolsContainer[index].state !== eSymbolContainerStates.REMOVED
+    ) {
+      this._symbolsContainer[index].symbolExplode();
+      await waitForTickerTime(400, Game.ticker);
+      this._bubblesParticles[index].start();
+    }
   }
 
   /**

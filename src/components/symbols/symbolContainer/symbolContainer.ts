@@ -112,6 +112,7 @@ export default class SymbolContainer extends FadeContainer {
    * Hide the symbol container by disolving it.
    */
   public async symbolDisolve() {
+    this.state = eSymbolContainerStates.REMOVING;
     this._dustParticles.visible = true;
     this._dustParticles.start();
 
@@ -119,13 +120,16 @@ export default class SymbolContainer extends FadeContainer {
 
     this._dustParticles.stop();
     this._dustParticles.visible = false;
+    this.state = eSymbolContainerStates.REMOVED;
   }
 
   /**
    * Hide the symbol container by reducing it.
    */
   public async symbolReduce(duration?: number) {
+    this.state = eSymbolContainerStates.REMOVING;
     await this._symbol.reduce(duration);
+    this.state = eSymbolContainerStates.REMOVED;
   }
 
   /**
@@ -134,8 +138,10 @@ export default class SymbolContainer extends FadeContainer {
    * @param position
    */
   public async symbolCollision(position: PointData) {
+    this.state = eSymbolContainerStates.REMOVING;
     await this._symbol.floatingAnimation.stop();
     await this.positionTo(position, 1, 'power3.in');
     await this.symbolExplode();
+    this.state = eSymbolContainerStates.REMOVED;
   }
 }
