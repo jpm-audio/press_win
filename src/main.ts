@@ -22,7 +22,6 @@ import { Locale } from './systems/locale/locale';
     backgroundAlpha: 0,
     resizeTo: canvasContainerEl,
     resolution: environment.canvasResolution,
-    roundPixels: true,
   });
   canvasContainerEl.appendChild(app.canvas);
 
