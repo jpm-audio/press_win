@@ -3,22 +3,6 @@
     {
       "type": "play",
       "player": {
-        "balance": 60
-      },
-      "play": {
-        "id": "6542586",
-        "symbols": ["s07", "s07", "s10"],
-        "win": {
-          "totalWin": 4100,
-          "symbolWin": 700,
-          "winSymbols": ["s07", "s07", "s10"],
-          "winSymbol": "s07"
-        }
-      }
-    },
-    {
-      "type": "play",
-      "player": {
         "balance": 600
       },
       "play": {
@@ -40,6 +24,87 @@
       "play": {
         "id": "6542584",
         "symbols": ["s08", "s06", "s04"],
+        "win": null
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 4700
+      },
+      "play": {
+        "id": "6542586",
+        "symbols": ["s07", "s07", "s10"],
+        "win": {
+          "totalWin": 4100,
+          "symbolWin": 700,
+          "winSymbols": ["s07", "s07", "s00"],
+          "winSymbol": "s07"
+        }
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 4700
+      },
+      "play": {
+        "id": "6542587",
+        "symbols": ["s02", "s01", "s03"],
+        "win": null
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 4700
+      },
+      "play": {
+        "id": "6542597",
+        "symbols": ["s08", "s06", "s01"],
+        "win": null
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 10100
+      },
+      "play": {
+        "id": "6542586",
+        "symbols": ["s09", "s09", "s09"],
+        "win": {
+          "totalWin": 5400,
+          "symbolWin": 900,
+          "winSymbols": ["s09", "s09", "s09"],
+          "winSymbol": "s09"
+        }
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 10900
+      },
+      "play": {
+        "id": "6542589",
+        "symbols": ["s04", "s04", "s01"],
+        "win": {
+          "totalWin": 800,
+          "symbolWin": 400,
+          "winSymbols": ["s04", "s04", null],
+          "winSymbol": "s04"
+        }
+      }
+    },
+    {
+      "type": "play",
+      "player": {
+        "balance": 10900
+      },
+      "play": {
+        "id": "6542587",
+        "symbols": ["s02", "s09", "s07"],
         "win": null
       }
     }

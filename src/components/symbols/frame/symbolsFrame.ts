@@ -147,7 +147,7 @@ export default class SymbolsFrame extends Container {
       this._symbolsContainer[index].state !== eSymbolContainerStates.REMOVED
     ) {
       this._symbolsContainer[index].symbolExplode();
-      await waitForTickerTime(400, Game.ticker);
+      await waitForTickerTime(200, Game.ticker);
       this._bubblesParticles[index].start();
     }
   }

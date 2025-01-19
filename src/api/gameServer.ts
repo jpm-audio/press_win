@@ -15,16 +15,6 @@ export default class GameServer {
   public playResponses: iServerPlayResponse[];
   public playResponseIndex: number = 0;
 
-  public getNextPlayIndex() {
-    const index = this.playResponseIndex++;
-
-    if (index >= this.playResponses.length) {
-      this.playResponseIndex = 0;
-    }
-
-    return index;
-  }
-
   constructor() {
     this.initResponse = initResponses.responses[
       Math.floor(Math.random() * initResponses.responses.length)
@@ -33,7 +23,14 @@ export default class GameServer {
 
     // Set first play response as the init play response
     this.initResponse.initPlay = this.playResponses[0];
-    this.playResponseIndex = this.getNextPlayIndex();
+  }
+
+  protected _updateNextPlayIndex() {
+    this.playResponseIndex++;
+
+    if (this.playResponseIndex >= this.playResponses.length) {
+      this.playResponseIndex = 0;
+    }
   }
 
   protected _getRandomDelay() {
@@ -49,9 +46,10 @@ export default class GameServer {
 
   public async play(): Promise<iServerPlayResponse> {
     await waitForTime(this._getRandomDelay());
+    this._updateNextPlayIndex();
     const playResponse = this.playResponses[this.playResponseIndex];
-    this.playResponseIndex = this.getNextPlayIndex();
 
+    console.log(playResponse);
     return playResponse;
   }
 }

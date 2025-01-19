@@ -1,4 +1,4 @@
-import { Color, DestroyOptions, Sprite } from 'pixi.js';
+import { Color, DestroyOptions, Sprite, Texture } from 'pixi.js';
 import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
@@ -33,6 +33,7 @@ import { CoinsAnimation } from '../../components/particles/coins/coinsAnimation'
 import { COINS_RAIN_PARTICLES_CONFIG } from '../../components/particles/coins/configs/rainConfig';
 import waitForTickerTime from '../../utils/waitForTickerTime';
 import WinCounter from '../../components/display/winCounter/winCounter';
+import GameTitle from '../../components/gameTitle/gameTitle';
 
 export default class GameScene extends Scene {
   protected _backgrounds: Map<eGameSceneModes, Sprite> = new Map();
@@ -42,6 +43,8 @@ export default class GameScene extends Scene {
   protected _messageBox!: MessageBox;
   protected _winCounter!: WinCounter;
   protected _playButton!: Button;
+  protected _gameTitle!: GameTitle;
+  protected _bigWinTitle!: GameTitle;
   protected _mode: eGameSceneModes;
 
   constructor() {
@@ -109,6 +112,20 @@ export default class GameScene extends Scene {
     this._coinsRain.x = GAME_CONFIG.referenceSize.width / 2;
     this._coinsRain.y = GAME_CONFIG.referenceSize.height / 2;
     this.addChild(this._coinsRain);
+
+    // Game Titles
+    this._gameTitle = new GameTitle(Texture.from('game_logo.png'));
+    this._gameTitle.x = GAME_CONFIG.referenceSize.width / 2;
+    this._gameTitle.y = this._gameTitle.height / 2;
+    this.addChild(this._gameTitle);
+
+    this._bigWinTitle = new GameTitle(Texture.from('bigwin_title.png'));
+    this._bigWinTitle.scale.set(0.85);
+    this._bigWinTitle.x = this._gameTitle.x;
+    this._bigWinTitle.y = this._bigWinTitle.height / 2 + 15;
+    this._bigWinTitle.visible = false;
+    this._bigWinTitle.alpha = 0;
+    this.addChild(this._bigWinTitle);
 
     // Symbols Frame
     this._symbolsFrame = new SymbolsFrame().init({
@@ -189,6 +206,23 @@ export default class GameScene extends Scene {
       });
 
       this._mode = mode;
+
+      if (mode === eGameSceneModes.BIG_WIN) {
+        this._bigWinTitle.show();
+        this._bigWinTitle.playWin();
+        this._gameTitle.hide();
+      }
+
+      if (mode === eGameSceneModes.GAME) {
+        this._bigWinTitle.playNormal();
+        this._bigWinTitle.hide();
+        this._gameTitle.show();
+        this._gameTitle.playNormal();
+      }
+
+      if (mode === eGameSceneModes.WIN) {
+        this._gameTitle.playWin();
+      }
 
       await gsap.to(currentBackground, {
         duration: duration,
