@@ -95,11 +95,13 @@ export default class Button extends Container {
 
   public enable(): void {
     this.eventMode = 'static';
+    this.cursor = 'pointer';
     this._setState(eButtonState.NORMAL);
   }
 
   public disable(): void {
     this.eventMode = 'none';
+    this.cursor = 'default';
     this._setState(eButtonState.DISABLED);
   }
 }
