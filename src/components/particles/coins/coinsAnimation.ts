@@ -2,7 +2,7 @@ import { Container, PointData } from 'pixi.js';
 import { ParticleEmitter } from '../../../systems/particles/ParticleEmitter';
 import { iParticleEmitterOptions } from '../../../systems/particles/types';
 
-export class BubblesAnimation extends Container {
+export class CoinsFountainAnimation extends Container {
   protected _emitter: ParticleEmitter;
 
   public get ticker() {

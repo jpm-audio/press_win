@@ -10,7 +10,7 @@ import playResponses from '../data/play.json';
  * It is used to simulate a real server connexion and responses with a random delay configured.
  */
 export default class GameServer {
-  protected _responseDelayRange: [number, number] = [1000, 2000];
+  protected _responseDelayRange: [number, number] = [10, 100]; //[1000, 2000];
   public initResponse: iServerInitResponse;
   public playResponses: iServerPlayResponse[];
   public playResponseIndex: number = 0;

@@ -7,6 +7,8 @@ import Game from '../../../systems/game/game';
 import Symbol from '../symbol/symbol';
 import { eSymbolContainerEvents, eSymbolContainerStates } from './types';
 import FadeContainer from '../../fadeContainer/fadeContainer';
+import { BubblesAnimation } from '../../particles/bubbles/bubblesAnimation';
+import { DUST_PARTICLES_CONFIG } from '../../particles/bubbles/configs/dustConfig';
 
 /**
  * Symbol Container
@@ -20,6 +22,7 @@ export default class SymbolContainer extends FadeContainer {
   protected _symbolLayer: Container;
   protected _giftBox: GiftBox;
   protected _symbol!: Symbol;
+  protected _dustParticles!: BubblesAnimation;
   protected _currentState: eSymbolContainerStates =
     eSymbolContainerStates.REMOVED;
 
@@ -44,6 +47,11 @@ export default class SymbolContainer extends FadeContainer {
     this._giftBox = new GiftBox();
     this._giftBox.on(eGiftBoxEvents.PRESS, () => this.revealSymbol());
     this.addChild(this._giftBox);
+
+    // Create Dust Particles
+    this._dustParticles = new BubblesAnimation(DUST_PARTICLES_CONFIG);
+    this._dustParticles.visible = false;
+    this.addChild(this._dustParticles);
   }
 
   /**
@@ -104,7 +112,13 @@ export default class SymbolContainer extends FadeContainer {
    * Hide the symbol container by disolving it.
    */
   public async symbolDisolve() {
+    this._dustParticles.visible = true;
+    this._dustParticles.start();
+
     await this._symbol.disolve();
+
+    this._dustParticles.stop();
+    this._dustParticles.visible = false;
   }
 
   /**

@@ -39,7 +39,7 @@ export class ParticleEmitter extends ParticleContainer {
   protected _spawnInterval: number = 0;
   protected _spawnVelocity: number = 0;
   protected _spawnDurationElapsed: number = 0;
-  protected _maxParticles: number = 100;
+  protected _maxParticles: number = -1;
   protected _isRunning: boolean = false;
   protected _isPaused: boolean = false;
 
@@ -176,7 +176,11 @@ export class ParticleEmitter extends ParticleContainer {
     if (!this.spawn || !this._spawnInterval) return;
 
     // Check if max particles reached
-    if (this.particleChildren.length >= this._maxParticles) return;
+    if (
+      this._maxParticles !== -1 &&
+      this.particleChildren.length >= this._maxParticles
+    )
+      return;
 
     // Check if spawn interval reached
     this._spawnElapsed += elapsedMS;

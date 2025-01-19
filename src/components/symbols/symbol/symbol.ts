@@ -142,7 +142,7 @@ export default class Symbol extends Container {
    */
   public async disolve() {
     await this._showHideAnimation(SYMBOL_DISOLVE_ANIMATION_OPTIONS);
-    await this._floatingAnimation.stop();
+    this._floatingAnimation.stop();
   }
 
   /**

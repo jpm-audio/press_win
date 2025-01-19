@@ -12,7 +12,7 @@ export const SYMBOL_DISOLVE_ANIMATION_OPTIONS = {
   pixi: {
     alpha: 0,
   },
-  ease: 'circ.in',
+  ease: 'power1.in',
 };
 
 export const SYMBOL_EXPLODE_ANIMATION_OPTIONS = {

@@ -10,9 +10,10 @@ import {
   eSymbolContainerEvents,
   eSymbolContainerStates,
 } from '../symbolContainer/types';
-import { iServerPlayResponse } from '../../../api/types';
+import { iServerPlayResponse, TSymbolId } from '../../../api/types';
 import { BubblesAnimation } from '../../particles/bubbles/bubblesAnimation';
 import gsap from 'gsap';
+import { BUBBLES_PARTICLES_CONFIG } from '../../particles/bubbles/configs/bubblesConfig';
 
 /**
  * Symbols Frame
@@ -68,8 +69,7 @@ export default class SymbolsFrame extends Container {
         this
       );
 
-      const bubblesParticles = new BubblesAnimation();
-      bubblesParticles.x = symbolContainer.x;
+      const bubblesParticles = new BubblesAnimation(BUBBLES_PARTICLES_CONFIG);
       this._bubblesParticles.push(bubblesParticles);
       this._bubblesLayer.addChild(bubblesParticles);
     }
@@ -202,60 +202,57 @@ export default class SymbolsFrame extends Container {
    *
    * @param playResponse
    */
-  public async showResults(playResponse: iServerPlayResponse) {
-    console.log('show results', playResponse);
+  public async showWin(
+    winResultSymbols: (TSymbolId | null)[],
+    isBigWin: boolean
+  ) {
+    // Show Big Win
+    if (isBigWin) {
+      //this.emit(eSymbolsFrameEvents.BIG_WIN);
+    }
 
-    // Check whether there is a win
-    if (playResponse.play.win) {
-      const winInfo = playResponse.play.win;
-      // Check if Win or Big Win
-      const isBigWin = false;
+    // Show Win
+    else {
+      // Get non-win symbols and win symbols
+      const nonWinSymbols = [];
+      const winSymbols = [];
+      let lastPromise;
 
-      // Show Big Win
-      if (isBigWin) {
-        //this.emit(eSymbolsFrameEvents.BIG_WIN);
-      }
-
-      // Show Win
-      else {
-        // Get non-win symbols and win symbols
-        const nonWinSymbols = [];
-        const winSymbols = [];
-        for (let i = 0; i < winInfo.winSymbols.length; i++) {
-          if (winInfo.winSymbols[i] === null) {
-            nonWinSymbols.push(this._symbolsContainer[i]);
-          } else {
-            winSymbols.push(this._symbolsContainer[i]);
-          }
+      for (let i = 0; i < winResultSymbols.length; i++) {
+        if (winResultSymbols[i] === null) {
+          nonWinSymbols.push(this._symbolsContainer[i]);
+        } else {
+          winSymbols.push(this._symbolsContainer[i]);
         }
-
-        // Non-win Symbols Fades away
-        nonWinSymbols.forEach((symbolContainer) => {
-          this._symbolDisolveAnimation(symbolContainer);
-        });
-
-        // Win Symbols Fly to join at the center
-        const centerPosition = {
-          x: GAME_CONFIG.referenceSize.width / 2,
-          y: 0,
-        };
-        let lastPromise;
-        winSymbols.forEach((symbolContainer) => {
-          lastPromise = symbolContainer.positionTo(
-            centerPosition,
-            1,
-            'power3.in'
-          );
-        });
-        await lastPromise;
-
-        // Win Symbols Explode
-        winSymbols.forEach((symbolContainer) => {
-          lastPromise = symbolContainer.symbolExplode();
-        });
-
-        await lastPromise;
       }
+
+      // Non-win Symbols Fades away
+      nonWinSymbols.forEach((symbolContainer) => {
+        lastPromise = this._symbolDisolveAnimation(symbolContainer);
+      });
+
+      await lastPromise;
+
+      // Win Symbols Fly to join at the center
+      const centerPosition = {
+        x: GAME_CONFIG.referenceSize.width / 2,
+        y: 0,
+      };
+      winSymbols.forEach((symbolContainer) => {
+        lastPromise = symbolContainer.positionTo(
+          centerPosition,
+          1,
+          'power1.in'
+        );
+      });
+      await lastPromise;
+
+      // Win Symbols Explode
+      winSymbols.forEach((symbolContainer) => {
+        lastPromise = symbolContainer.symbolExplode();
+      });
+
+      await lastPromise;
     }
   }
 
@@ -267,6 +264,7 @@ export default class SymbolsFrame extends Container {
     const xDistance = GAME_CONFIG.referenceSize.width / (numSymbols + 1);
     for (let i = 0; i < numSymbols; i++) {
       this._symbolsContainer[i].x = xDistance * (i + 1);
+      this._bubblesParticles[i].x = this._symbolsContainer[i].x;
     }
 
     this._symbolsLayer.x = this._bubblesLayer.x =

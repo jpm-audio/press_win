@@ -248,8 +248,20 @@ export default class GameScene extends Scene {
     // Hide the message box
     this._messageBox.hide();
 
-    // Clear the screen and show the new boxes
-    await this._symbolsFrame.showResults(playResponse);
+    console.log('show results', playResponse);
+
+    // Check whether there is a win
+    if (playResponse.play.win) {
+      const isBigWin = false;
+      const winInfo = playResponse.play.win;
+      const winSymbols = winInfo.winSymbols;
+
+      this.modeTo(eGameSceneModes.WIN);
+
+      await this._symbolsFrame.showWin(winSymbols, isBigWin);
+
+      this.modeTo(eGameSceneModes.GAME);
+    }
   }
 
   /**
