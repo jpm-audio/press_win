@@ -1,4 +1,4 @@
-import { Color, DestroyOptions, Sprite, TextStyleOptions } from 'pixi.js';
+import { Color, DestroyOptions, Sprite } from 'pixi.js';
 import Scene from '../scene/scene';
 import { eGameSceneModes } from './types';
 import gsap from 'gsap';
@@ -6,7 +6,7 @@ import SymbolsFrame from '../../components/symbols/frame/symbolsFrame';
 import { GAME_CONFIG } from '../../systems/game/config';
 import { iServerInitResponse, iServerPlayResponse } from '../../api/types';
 import MessageBox from '../../components/messageBox/messageBox';
-import { MESSAGE_BOX_CONFIG } from './config';
+import { GAME_MESSAGES, MESSAGE_BOX_CONFIG } from './config';
 import Game from '../../systems/game/game';
 import { eSymbolsFrameEvents } from '../../components/symbols/frame/types';
 import ButtonFactory from '../../components/buttons/buttonFactory';
@@ -90,13 +90,8 @@ export default class GameScene extends Scene {
 
     // Message Box
     this._messageBox = new MessageBox({
-      showTime: MESSAGE_BOX_CONFIG.showTime,
-      hideTime: MESSAGE_BOX_CONFIG.hideTime,
-      textOptions: {
-        text: '',
-        style: MESSAGE_BOX_CONFIG.textStyle as TextStyleOptions,
-        resolution: Game.game.assetsResolution,
-      },
+      ...MESSAGE_BOX_CONFIG,
+      ...{ resolution: Game.game.assetsResolution },
     });
     this._messageBox.x = GAME_CONFIG.referenceSize.width / 2;
     this._messageBox.y = (3 * GAME_CONFIG.referenceSize.height) / 4;
@@ -198,7 +193,7 @@ export default class GameScene extends Scene {
    * It shows the message box and starts the symbols frame animations.
    */
   public async onReadyGameState() {
-    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.initialState());
+    this._messageBox.setText(GAME_MESSAGES.initialState());
     this._messageBox.show();
   }
 
@@ -206,7 +201,7 @@ export default class GameScene extends Scene {
    * Listener callback called when the REVEALED game state is Reached
    */
   public async onRevealedGameState() {
-    this._messageBox.setText(MESSAGE_BOX_CONFIG.messages.playState());
+    this._messageBox.setText(GAME_MESSAGES.playState());
     this._playButton.enable();
     this._playButton.visible = true;
   }
@@ -221,9 +216,7 @@ export default class GameScene extends Scene {
     this._playButton.visible = false;
 
     // Set the message box properly
-    const messagePromise = this._messageBox.setText(
-      MESSAGE_BOX_CONFIG.messages.playState()
-    );
+    const messagePromise = this._messageBox.setText(GAME_MESSAGES.playState());
 
     // Start Play State on the screen
     const symbolsPromise = this._symbolsFrame.startPlay();

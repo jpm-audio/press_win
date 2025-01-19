@@ -4,21 +4,38 @@ export const SYMBOL_SHOW_ANIMATION_OPTIONS = {
     scaleX: 1,
     scaleY: 1,
   },
-  ease: 'back.out(1.7)',
+  ease: 'elastic.out(1,0.2)',
 };
 
-export const SYMBOL_HIDE_ANIMATION_OPTIONS = {
-  duration: 0.5,
+export const SYMBOL_DISOLVE_ANIMATION_OPTIONS = {
+  duration: 1,
+  pixi: {
+    alpha: 0,
+  },
+  ease: 'circ.in',
+};
+
+export const SYMBOL_EXPLODE_ANIMATION_OPTIONS = {
+  duration: 0.15,
   pixi: {
     scaleX: 2,
     scaleY: 2,
     alpha: 0,
   },
-  ease: 'elastic.in(1,0.5)',
+  ease: 'power2.in',
+};
+
+export const SYMBOL_REDUCE_ANIMATION_OPTIONS = {
+  duration: 1,
+  pixi: {
+    scaleX: 0,
+    scaleY: 0,
+  },
+  ease: 'expo.in',
 };
 
 export const SHINE_ANIMATION_OPTIONS = {
-  duration: 0.5,
+  duration: 0.25,
   pixi: {
     scaleX: 4,
     scaleY: 6,

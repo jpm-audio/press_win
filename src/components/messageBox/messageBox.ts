@@ -1,18 +1,33 @@
-import { Container } from 'pixi.js';
 import { LocaleText } from '../text/localeText';
 import { iMessageBoxOptions } from './types';
-import gsap from 'gsap';
+import FadeContainer from '../fadeContainer/fadeContainer';
 
-export default class MessageBox extends Container {
+export default class MessageBox extends FadeContainer {
   protected _text: LocaleText;
   protected _currentTween: gsap.core.Tween | null = null;
-  public options: iMessageBoxOptions;
+
+  public get textEl() {
+    return this._text;
+  }
 
   constructor(options: iMessageBoxOptions) {
     super();
-    this.options = options;
 
-    this._text = new LocaleText(this.options.textOptions);
+    if (options.showAnimationVars) {
+      this.showAnimationVars = {
+        ...this.showAnimationVars,
+        ...options.showAnimationVars,
+      };
+    }
+
+    if (options.hideAnimationVars) {
+      this.hideAnimationVars = {
+        ...this.hideAnimationVars,
+        ...options.hideAnimationVars,
+      };
+    }
+
+    this._text = new LocaleText(options.textOptions);
     this._text.anchor.set(0.5);
     this.addChild(this._text);
   }
@@ -22,31 +37,5 @@ export default class MessageBox extends Container {
     if (isShown) await this.hide();
     this._text.localeId = text;
     if (isShown) await this.show();
-  }
-
-  public async show() {
-    if (this.alpha === 1) return;
-    if (this._currentTween !== null) this._currentTween.kill();
-
-    this._currentTween = gsap.to(this, {
-      duration: this.options.showTime,
-      alpha: 1,
-      ease: 'power1.in',
-    });
-    await this._currentTween;
-    this._currentTween = null;
-  }
-
-  public async hide() {
-    if (this.alpha === 0) return;
-    if (this._currentTween !== null) this._currentTween.kill();
-
-    this._currentTween = gsap.to(this, {
-      duration: this.options.hideTime,
-      alpha: 0,
-      ease: 'power1.in',
-    });
-    await this._currentTween;
-    this._currentTween = null;
   }
 }

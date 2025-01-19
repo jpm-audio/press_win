@@ -6,8 +6,17 @@ import waitForTickerTime from '../../../utils/waitForTickerTime';
 import Game from '../../../systems/game/game';
 import Symbol from '../symbol/symbol';
 import { eSymbolContainerEvents, eSymbolContainerStates } from './types';
+import FadeContainer from '../../fadeContainer/fadeContainer';
 
-export default class SymbolContainer extends Container {
+/**
+ * Symbol Container
+ *
+ * A container that holds a GiftBox and a Symbol "inside" it.
+ *
+ * It will takes care about the animations and handling of the GiftBox, Symbol
+ * and animations such particle effects and so.
+ */
+export default class SymbolContainer extends FadeContainer {
   protected _symbolLayer: Container;
   protected _giftBox: GiftBox;
   protected _symbol!: Symbol;
@@ -23,6 +32,9 @@ export default class SymbolContainer extends Container {
     this.emit(eSymbolContainerEvents.STATE_CHANGED, this._currentState);
   }
 
+  /**
+   * Constructor
+   */
   constructor() {
     super();
     this._symbolLayer = new Container();
@@ -34,10 +46,13 @@ export default class SymbolContainer extends Container {
     this.addChild(this._giftBox);
   }
 
+  /**
+   * Reveals the symbol by exploding the GiftBox and showing the Symbol behind it.
+   */
   public async revealSymbol() {
     this.state = eSymbolContainerStates.REVEALING;
 
-    const giftBoxHidePromise = this._giftBox.hide();
+    const giftBoxHidePromise = this._giftBox.explode();
 
     await waitForTickerTime(250, Game.ticker);
     this._symbolLayer.alpha = 1;
@@ -47,6 +62,12 @@ export default class SymbolContainer extends Container {
     this.state = eSymbolContainerStates.REVEALED;
   }
 
+  /**
+   * Prepares the symbol for the next reveal.
+   * It removes the current symbol, if any, and sets the new one.
+   *
+   * @param symbolType
+   */
   public setSymbol(symbolType: string) {
     // First check whether there is a symbol already set and remove it
     if (this._symbol) {
@@ -60,15 +81,36 @@ export default class SymbolContainer extends Container {
     this._symbolLayer.addChild(this._symbol);
   }
 
+  /**
+   * Shows the GiftBox by its animation, falling down.
+   */
   public async show() {
+    this.reset();
     this.state = eSymbolContainerStates.SHOWING_GIFT_BOX;
-    await this._giftBox.show();
+    await this._giftBox.fallDown();
     this.state = eSymbolContainerStates.SHOWN_GIFT_BOX;
   }
 
-  public async hide() {
+  /**
+   * Hide the symbol by exploding it.
+   */
+  public async symbolExplode() {
     this.state = eSymbolContainerStates.REMOVING;
-    await this._symbol.hide();
+    await this._symbol.explode();
     this.state = eSymbolContainerStates.REMOVED;
+  }
+
+  /**
+   * Hide the symbol container by disolving it.
+   */
+  public async symbolDisolve() {
+    await this._symbol.disolve();
+  }
+
+  /**
+   * Hide the symbol container by reducing it.
+   */
+  public async symbolReduce(duration?: number) {
+    await this._symbol.reduce(duration);
   }
 }

@@ -48,7 +48,6 @@ export default class SymbolsFrame extends Container {
    */
   public init(options: iSymbolsFrameOptions) {
     const numSymbols = options.numSymbols;
-    const xDistance = GAME_CONFIG.referenceSize.width / (numSymbols + 1);
 
     // Initialize Factory to pre spawn symbols
     for (let i = 0; i < options.symbolTypes.length; i++) {
@@ -60,7 +59,6 @@ export default class SymbolsFrame extends Container {
     // Create SymbolContainers
     for (let i = 0; i < numSymbols; i++) {
       const symbolContainer = new SymbolContainer();
-      symbolContainer.x = xDistance * (i + 1);
       symbolContainer.setSymbol(options.initialState[i]);
       this._symbolsContainer.push(symbolContainer);
       this._symbolsLayer.addChild(symbolContainer);
@@ -76,10 +74,17 @@ export default class SymbolsFrame extends Container {
       this._bubblesLayer.addChild(bubblesParticles);
     }
 
-    this._symbolsLayer.x = this._bubblesLayer.x =
-      -GAME_CONFIG.referenceSize.width / 2;
-
     return this;
+  }
+
+  /**
+   * Helper function to handle the symbol disolve animation
+   * Symbol disolving animation and the bubbles particles.
+   *
+   * @param index
+   */
+  protected async _symbolDisolveAnimation(symbolContainer: SymbolContainer) {
+    await symbolContainer.symbolDisolve();
   }
 
   /**
@@ -138,7 +143,7 @@ export default class SymbolsFrame extends Container {
    * @param index
    */
   public async transformSymbolIntoBubbles(index: number) {
-    this._symbolsContainer[index].hide();
+    this._symbolsContainer[index].symbolExplode();
     await waitForTickerTime(400, Game.ticker);
     this._bubblesParticles[index].start();
   }
@@ -151,6 +156,9 @@ export default class SymbolsFrame extends Container {
    * @param playResponse
    */
   public async initSymbols(playResponse: iServerPlayResponse) {
+    // Reset positions
+    this.resetElementPositions();
+
     let lastPromise;
     for (let i = 0; i < this._bubblesParticles.length; i++) {
       lastPromise = this.removeBubblesParticles(i);
@@ -188,9 +196,80 @@ export default class SymbolsFrame extends Container {
     bubbles.alpha = 1;
   }
 
-  public async showResults(_playResponse: iServerPlayResponse) {
-    // TODO - Show Results animations if win
+  /**
+   * In case of a win, it shows the results of the play with the win celebration animations,
+   * for either win or big win.
+   *
+   * @param playResponse
+   */
+  public async showResults(playResponse: iServerPlayResponse) {
+    console.log('show results', playResponse);
 
-    console.log('show results');
+    // Check whether there is a win
+    if (playResponse.play.win) {
+      const winInfo = playResponse.play.win;
+      // Check if Win or Big Win
+      const isBigWin = false;
+
+      // Show Big Win
+      if (isBigWin) {
+        //this.emit(eSymbolsFrameEvents.BIG_WIN);
+      }
+
+      // Show Win
+      else {
+        // Get non-win symbols and win symbols
+        const nonWinSymbols = [];
+        const winSymbols = [];
+        for (let i = 0; i < winInfo.winSymbols.length; i++) {
+          if (winInfo.winSymbols[i] === null) {
+            nonWinSymbols.push(this._symbolsContainer[i]);
+          } else {
+            winSymbols.push(this._symbolsContainer[i]);
+          }
+        }
+
+        // Non-win Symbols Fades away
+        nonWinSymbols.forEach((symbolContainer) => {
+          this._symbolDisolveAnimation(symbolContainer);
+        });
+
+        // Win Symbols Fly to join at the center
+        const centerPosition = {
+          x: GAME_CONFIG.referenceSize.width / 2,
+          y: 0,
+        };
+        let lastPromise;
+        winSymbols.forEach((symbolContainer) => {
+          lastPromise = symbolContainer.positionTo(
+            centerPosition,
+            1,
+            'power3.in'
+          );
+        });
+        await lastPromise;
+
+        // Win Symbols Explode
+        winSymbols.forEach((symbolContainer) => {
+          lastPromise = symbolContainer.symbolExplode();
+        });
+
+        await lastPromise;
+      }
+    }
+  }
+
+  /**
+   * Resets the positions of all elements to their initial state positions.
+   */
+  public resetElementPositions() {
+    const numSymbols = this._symbolsContainer.length;
+    const xDistance = GAME_CONFIG.referenceSize.width / (numSymbols + 1);
+    for (let i = 0; i < numSymbols; i++) {
+      this._symbolsContainer[i].x = xDistance * (i + 1);
+    }
+
+    this._symbolsLayer.x = this._bubblesLayer.x =
+      -GAME_CONFIG.referenceSize.width / 2;
   }
 }

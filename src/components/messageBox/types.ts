@@ -1,7 +1,7 @@
 import { TextOptions } from 'pixi.js';
 
 export interface iMessageBoxOptions {
-  showTime: number;
-  hideTime: number;
+  showAnimationVars: gsap.TweenVars;
+  hideAnimationVars: gsap.TweenVars;
   textOptions: TextOptions;
 }

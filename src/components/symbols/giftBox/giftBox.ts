@@ -76,30 +76,10 @@ export default class GiftBox extends Container {
     this._giftBox.on('pointerdown', () => this._onPress());
   }
 
-  protected _onPress() {
-    this.emit(eGiftBoxEvents.PRESS);
-  }
-
-  public async show() {
-    this._shakeAnimation.options = GIFT_BOX_SHAKE_ANIMATION_OPTIONS();
-    this._moveAnimation.options = GIFT_BOX_SHOW_ANIMATION_OPTIONS;
-    await this._moveAnimation.start();
-    await this._shakeAnimation.start();
-    this.enable();
-  }
-
-  public async callToAction() {
-    this._moveAnimation.options = GIFT_C2A_UP_ANIMATION_OPTIONS;
-    this._shakeAnimation.options = GIFT_C2A_SHAKE_ANIMATION_OPTIONS();
-
-    this._shakeAnimation.start();
-    await this._moveAnimation.start();
-
-    this._moveAnimation.options = GIFT_C2A_DOWN_ANIMATION_OPTIONS;
-    await this._moveAnimation.start();
-  }
-
-  public async explode() {
+  /**
+   * GiftBox Exploding animation
+   */
+  protected async _boxExplodes() {
     this._moveAnimation.options = GIFT_HIDE_ANIMATION_OPTIONS;
     const movePromise = this._moveAnimation.start();
 
@@ -120,11 +100,43 @@ export default class GiftBox extends Container {
     this.emit(eGiftBoxEvents.SHOWN);
   }
 
-  public async hide() {
+  /**
+   * Event listener for player press action handling
+   */
+  protected _onPress() {
+    this.emit(eGiftBoxEvents.PRESS);
+  }
+
+  /**
+   * Shows the GiftBox by its animation, falling down.
+   */
+  public async fallDown() {
+    this._shakeAnimation.options = GIFT_BOX_SHAKE_ANIMATION_OPTIONS();
+    this._moveAnimation.options = GIFT_BOX_SHOW_ANIMATION_OPTIONS;
+    await this._moveAnimation.start();
+    await this._shakeAnimation.start();
+    this.enable();
+  }
+
+  public async callToAction() {
+    this._moveAnimation.options = GIFT_C2A_UP_ANIMATION_OPTIONS;
+    this._shakeAnimation.options = GIFT_C2A_SHAKE_ANIMATION_OPTIONS();
+
+    this._shakeAnimation.start();
+    await this._moveAnimation.start();
+
+    this._moveAnimation.options = GIFT_C2A_DOWN_ANIMATION_OPTIONS;
+    await this._moveAnimation.start();
+  }
+
+  /**
+   * Explodes the GiftBox by its animation in a cloud of smoke
+   */
+  public async explode() {
     this.disable();
 
     // Box Explode
-    this.explode();
+    this._boxExplodes();
 
     await waitForTickerTime(100, Game.ticker);
 
@@ -142,11 +154,17 @@ export default class GiftBox extends Container {
     this.emit(eGiftBoxEvents.HIDDEN);
   }
 
+  /**
+   * Enables the GiftBox interaction
+   */
   public enable() {
     this._giftBox.eventMode = 'static';
     this._giftBox.cursor = 'pointer';
   }
 
+  /**
+   * Disables the GiftBox interaction
+   */
   public disable() {
     this._giftBox.eventMode = 'none';
     this._giftBox.cursor = 'default';

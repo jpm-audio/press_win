@@ -2,13 +2,20 @@ import gsap from 'gsap';
 import { Container, Sprite, Texture } from 'pixi.js';
 import {
   SHINE_ANIMATION_OPTIONS,
+  SYMBOL_DISOLVE_ANIMATION_OPTIONS,
+  SYMBOL_EXPLODE_ANIMATION_OPTIONS,
   SYMBOL_FLOATING_ANIMATION_OPTIONS,
-  SYMBOL_HIDE_ANIMATION_OPTIONS,
+  SYMBOL_REDUCE_ANIMATION_OPTIONS,
   SYMBOL_SHOW_ANIMATION_OPTIONS,
 } from './config';
 import { iFloatingAnimationOptions } from '../../../animations/floatingAnimation/types';
 import FloatingAnimation from '../../../animations/floatingAnimation/floatingAnimation';
 
+/**
+ * Symbol
+ *
+ * A symbol that can be shown and hidden.
+ */
 export default class Symbol extends Container {
   protected _floatingLayer: Container;
   protected _bubble: Sprite;
@@ -26,6 +33,12 @@ export default class Symbol extends Container {
     this._symbolType = symbolType;
     this._symbol.texture = Texture.from(`${symbolType}.png`);
   }
+
+  /**
+   * Constructor
+   *
+   * @param symbolType
+   */
   constructor(symbolType: string) {
     super();
 
@@ -55,6 +68,31 @@ export default class Symbol extends Container {
   }
 
   /**
+   * Utility function to handle the show and hide animations,
+   * by just passing the tween vars info.
+   *
+   * @param vars
+   */
+  protected async _showHideAnimation(vars: gsap.TweenVars) {
+    this._cancelShowHideAnimation();
+
+    this._currentShowHideTween = gsap.to(this._floatingLayer, vars);
+
+    await this._currentShowHideTween;
+    this._currentShowHideTween = null;
+  }
+
+  /**
+   * Utility function to cancel any show and hide animation.
+   */
+  protected _cancelShowHideAnimation() {
+    if (this._currentShowHideTween) {
+      this._currentShowHideTween.kill();
+      this._currentShowHideTween = null;
+    }
+  }
+
+  /**
    * Called from SymbolFactory when is requested
    */
   public init() {
@@ -65,40 +103,29 @@ export default class Symbol extends Container {
   }
 
   /**
-   * Called from SymbolFactory when is returned
+   * Starts the floating animation loop.
    */
-  public reset() {
-    this._floatingAnimation.stop();
-  }
-
-  public async show() {
-    if (this._currentShowHideTween) this._currentShowHideTween.kill();
-
-    this._currentShowHideTween = gsap.to(
-      this._floatingLayer,
-      SYMBOL_SHOW_ANIMATION_OPTIONS
-    );
-
-    await this._currentShowHideTween;
-    this._currentShowHideTween = null;
-
-    this.float();
-  }
-
   public float() {
     this._floatingAnimation.start();
   }
 
-  public async hide() {
-    if (this._currentShowHideTween) this._currentShowHideTween.kill();
-    this._currentShowHideTween = null;
+  /**
+   * Symbol Showing animation, it is scale in, it also takes care to init floating animation.
+   */
+  public async show() {
+    await this._showHideAnimation(SYMBOL_SHOW_ANIMATION_OPTIONS);
+    this.float();
+  }
 
+  /**
+   * Symbol Exploding animation
+   */
+  public async explode() {
     // Symbol & Bubble Scale Up
     const floatinStopPromise = this._floatingAnimation.stop();
     const shinePromise = gsap.to(this._shine, SHINE_ANIMATION_OPTIONS);
-    const symbolHidePromise = gsap.to(
-      this._floatingLayer,
-      SYMBOL_HIDE_ANIMATION_OPTIONS
+    const symbolHidePromise = this._showHideAnimation(
+      SYMBOL_EXPLODE_ANIMATION_OPTIONS
     );
 
     await Promise.all([shinePromise, symbolHidePromise]);
@@ -108,5 +135,32 @@ export default class Symbol extends Container {
     this._shine.alpha = 0;
 
     await floatinStopPromise;
+  }
+
+  /**
+   * Symbol Disolving animation, it is the alpha fading out animation
+   */
+  public async disolve() {
+    await this._showHideAnimation(SYMBOL_DISOLVE_ANIMATION_OPTIONS);
+    await this._floatingAnimation.stop();
+  }
+
+  /**
+   * Symbol Reducing animation, it is a scale out animation
+   */
+  public async reduce(duration: number = 1) {
+    await this._showHideAnimation({
+      ...SYMBOL_REDUCE_ANIMATION_OPTIONS,
+      ...{ duration },
+    });
+    await this._floatingAnimation.stop();
+  }
+
+  /**
+   * Called from SymbolFactory when is returned
+   */
+  public reset() {
+    this._cancelShowHideAnimation();
+    this._floatingAnimation.stop();
   }
 }
