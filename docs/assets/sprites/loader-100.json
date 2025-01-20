@@ -1,0 +1,20 @@
+{"frames": {
+
+"game_logo.png":
+{
+	"frame": {"x":1,"y":1,"w":470,"h":179},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":470,"h":179},
+	"sourceSize": {"w":470,"h":179}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.1",
+	"image": "loader-100.png",
+	"format": "RGBA8888",
+	"size": {"w":472,"h":181},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:365070ee4b1e09622e12a26021ebdee9:7490e4311658208efeec5d48b2682cd4:23c9c3c965cd43999b54fd30b2d3e0cf$"
+}
+}
